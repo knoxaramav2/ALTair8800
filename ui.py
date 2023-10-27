@@ -52,7 +52,7 @@ class UI:
     _row_wait_a0 = 3
     _row_addr_sw = 8
     _row_ctrl_sw = 6
-    _row_spaces = []
+    _row_spaces = [0, 2,4,5,7,9,10]
 
     _win_width = 1200
     _win_height = 550
