@@ -49,10 +49,10 @@ class UI:
 
     #row specifiers
     _row_inte_d0 = 1
-    _row_wait_a0 = 3
-    _row_addr_sw = 8
-    _row_ctrl_sw = 6
-    _row_spaces = [0, 2,4,5,7,9,10]
+    _row_wait_a0 = 4
+    _row_addr_sw = 6
+    _row_ctrl_sw = 8
+    _row_spaces = [0,2,3,5,7,9,10]
 
     _win_width = 1200
     _win_height = 550
@@ -134,18 +134,22 @@ class UI:
             )
 
         Label(grid, 
+                text='STATUS', fg='white',
+                background=self.chromakey,
+                font=(self._lbl_font, self._lbl_font_sz)
+                ).grid(column=8, row=self._row_inte_d0+1)
+
+        Label(grid, 
                 text='Sense Sw. _______', fg='white', 
                 background=self.chromakey,
                 font=(self._lbl_font, self._lbl_font_sz)
                 ).place(x=150, y=190)
-        #Always right of A0 toggle
-        a0y=next((x for x in self.toggles if x.name == Switch.addr0.name), None)
         Label(grid, 
                 text='DATA\n\nADDRESS', fg='white',
                 wraplength=1000,
                 background=self.chromakey,
                 font=(self._lbl_font, self._lbl_font_sz)
-                ).grid(column=24, row=6)
+                ).grid(column=24, row=self._row_addr_sw)
         # Label(self.cvc,
         #       text='ALTair 8800',
         #       background=self.chromakey,
@@ -254,89 +258,79 @@ class UI:
         rc = self._row_ctrl_sw
         ra = self._row_addr_sw
 
-        self._spacer(grid, 1, 9)
-        self._spacer(grid, 1, 10)
-        self._create_toggle(grid, 1, 8, Switch.on_off.name, 'OFF|ON', 'blue')
+        self._create_toggle(grid, 1, rc, Switch.on_off.name, 'OFF|ON', 'blue')
         self._spacer(grid, 2, 8)
-        self._create_toggle(grid, 6, 8, Switch.stop_run.name, 'STOP|RUN')
-        self._create_toggle(grid, 8, 8, Switch.single_step.name, 'SINGLE STEP')
-        self._create_toggle(grid, 10, 8, Switch.examine.name, 'EXAMINE|EXAMINE NEXT')
-        self._create_toggle(grid, 12, 8, Switch.deposit.name, 'DEPOSIT|DEPOSIT NEXT')
-        self._create_toggle(grid, 14, 8, Switch.reset_clr.name,'RESET|CLR')
-        self._create_toggle(grid, 16, 8, Switch.prtct_unprtct.name, 'PROTECT|UNPROTECT')
-        self._create_toggle(grid, 18, 8, Switch.aux1.name, 'AUX1')
-        self._create_toggle(grid, 20, 8, Switch.aux2.name, 'AUX2')
-
-        self._spacer(grid, 2, 7)
-
-        self._create_toggle(grid, 6, 6, Switch.addr15.name, '15', 'red')
-        self._create_toggle(grid, 7, 6, Switch.addr14.name, '14', 'red')
-        self._create_toggle(grid, 8, 6, Switch.addr13.name, '13', 'red')
-        self._create_toggle(grid, 9, 6, Switch.addr12.name, '12', 'red')
-        self._create_toggle(grid, 10, 6, Switch.addr11.name, '11', 'red')
-        self._create_toggle(grid, 11, 6, Switch.addr10.name, '10', 'red')
-        self._create_toggle(grid, 12, 6, Switch.addr9.name, '9', 'red')
-        self._create_toggle(grid, 13, 6, Switch.addr8.name, '8', 'red')
-        self._create_toggle(grid, 16, 6, Switch.addr7.name, '7', 'white')
-        self._create_toggle(grid, 17, 6, Switch.addr6.name, '6', 'white')
-        self._create_toggle(grid, 18, 6, Switch.addr5.name, '5', 'white')
-        self._create_toggle(grid, 19, 6, Switch.addr4.name, '4', 'white')
-        self._create_toggle(grid, 20, 6, Switch.addr3.name, '3', 'white')
-        self._create_toggle(grid, 21, 6, Switch.addr2.name, '2', 'white')
-        self._create_toggle(grid, 22, 6, Switch.addr1.name, '1', 'white')
-        self._create_toggle(grid, 23, 6, Switch.addr0.name, '0', 'white')
-
-        self._spacer(grid, 1, 5)
-        self._spacer(grid, 1, 4)
+        self._create_toggle(grid, 6, rc, Switch.stop_run.name, 'STOP|RUN')
+        self._create_toggle(grid, 8, rc, Switch.single_step.name, 'SINGLE STEP')
+        self._create_toggle(grid, 10, rc, Switch.examine.name, 'EXAMINE|EXAMINE NEXT')
+        self._create_toggle(grid, 12, rc, Switch.deposit.name, 'DEPOSIT|DEPOSIT NEXT')
+        self._create_toggle(grid, 14, rc, Switch.reset_clr.name,'RESET|CLR')
+        self._create_toggle(grid, 16, rc, Switch.prtct_unprtct.name, 'PROTECT|UNPROTECT')
+        self._create_toggle(grid, 18, rc, Switch.aux1.name, 'AUX1')
+        self._create_toggle(grid, 20, rc, Switch.aux2.name, 'AUX2')
+        self._create_toggle(grid, 6, ra, Switch.addr15.name, '15', 'red')
+        self._create_toggle(grid, 7, ra, Switch.addr14.name, '14', 'red')
+        self._create_toggle(grid, 8, ra, Switch.addr13.name, '13', 'red')
+        self._create_toggle(grid, 9, ra, Switch.addr12.name, '12', 'red')
+        self._create_toggle(grid, 10, ra, Switch.addr11.name, '11', 'red')
+        self._create_toggle(grid, 11, ra, Switch.addr10.name, '10', 'red')
+        self._create_toggle(grid, 12, ra, Switch.addr9.name, '9', 'red')
+        self._create_toggle(grid, 13, ra, Switch.addr8.name, '8', 'red')
+        self._create_toggle(grid, 16, ra, Switch.addr7.name, '7', 'white')
+        self._create_toggle(grid, 17, ra, Switch.addr6.name, '6', 'white')
+        self._create_toggle(grid, 18, ra, Switch.addr5.name, '5', 'white')
+        self._create_toggle(grid, 19, ra, Switch.addr4.name, '4', 'white')
+        self._create_toggle(grid, 20, ra, Switch.addr3.name, '3', 'white')
+        self._create_toggle(grid, 21, ra, Switch.addr2.name, '2', 'white')
+        self._create_toggle(grid, 22, ra, Switch.addr1.name, '1', 'white')
+        self._create_toggle(grid, 23, ra, Switch.addr0.name, '0', 'white')
         self._spacer(grid, 24, 6)
 
     def _init_leds(self, grid):
-        self._create_led(grid, 1, 6, Led.power.name, 'POWER', 'green')
-        self._create_led(grid, 3, 3, Led.wait.name, 'WAIT')
-        self._create_led(grid, 4, 3, Led.hlda.name, 'HLDA')
+        ra = self._row_wait_a0
+        rs = self._row_inte_d0
 
-        self._create_led(grid, 6, 3, Led.a15.name, 'A15')
-        self._create_led(grid, 7, 3, Led.a14.name, 'A14')
-        self._create_led(grid, 8, 3, Led.a13.name, 'A13')
-        self._create_led(grid, 9, 3, Led.a12.name, 'A12')
-        self._create_led(grid, 10, 3, Led.a11.name, 'A11')
-        self._create_led(grid, 11, 3, Led.a10.name, 'A10')
-        self._create_led(grid, 12, 3, Led.a9.name, 'A9')
-        self._create_led(grid, 13, 3, Led.a8.name, 'A8')
+        self._create_led(grid, 1, 6, Led.power.name, 'POWER', 'green')
+        self._create_led(grid, 3, ra, Led.wait.name, 'WAIT')
+        self._create_led(grid, 4, ra, Led.hlda.name, 'HLDA')
+
+        self._create_led(grid, 6, ra, Led.a15.name, 'A15')
+        self._create_led(grid, 7, ra, Led.a14.name, 'A14')
+        self._create_led(grid, 8, ra, Led.a13.name, 'A13')
+        self._create_led(grid, 9, ra, Led.a12.name, 'A12')
+        self._create_led(grid, 10, ra, Led.a11.name, 'A11')
+        self._create_led(grid, 11, ra, Led.a10.name, 'A10')
+        self._create_led(grid, 12, ra, Led.a9.name, 'A9')
+        self._create_led(grid, 13, ra, Led.a8.name, 'A8')
         self._spacer(grid, 14, 3)
         self._spacer(grid, 15, 3)
-        self._create_led(grid, 16, 3, Led.a7.name, 'A7')
-        self._create_led(grid, 17, 3, Led.a6.name, 'A6')
-        self._create_led(grid, 18, 3, Led.a5.name, 'A5')
-        self._create_led(grid, 19, 3, Led.a4.name, 'A4')
-        self._create_led(grid, 20, 3, Led.a3.name, 'A3')
-        self._create_led(grid, 21, 3, Led.a2.name, 'A2')
-        self._create_led(grid, 22, 3, Led.a1.name, 'A1')
-        self._create_led(grid, 23, 3, Led.a0.name, 'A0')
+        self._create_led(grid, 16, ra, Led.a7.name, 'A7')
+        self._create_led(grid, 17, ra, Led.a6.name, 'A6')
+        self._create_led(grid, 18, ra, Led.a5.name, 'A5')
+        self._create_led(grid, 19, ra, Led.a4.name, 'A4')
+        self._create_led(grid, 20, ra, Led.a3.name, 'A3')
+        self._create_led(grid, 21, ra, Led.a2.name, 'A2')
+        self._create_led(grid, 22, ra, Led.a1.name, 'A1')
+        self._create_led(grid, 23, ra, Led.a0.name, 'A0')
+        self._create_led(grid, 3, rs, Led.inte.name, 'INTE')
+        self._create_led(grid, 4, rs, Led.prot.name, 'PROT')
+        self._create_led(grid, 5, rs, Led.memr.name, 'MEMR')
+        self._create_led(grid, 6, rs, Led.inp.name, 'INP')
+        self._create_led(grid, 7, rs, Led.m1.name, 'M1')
+        self._create_led(grid, 8, rs, Led.out.name, 'OUT')
+        self._create_led(grid, 9, rs, Led.hlta.name, 'MLTA')
+        self._create_led(grid, 10, rs, Led.stack.name, 'STACK')
+        self._create_led(grid, 11, rs, Led.wo.name, 'WO')
+        self._create_led(grid, 12, rs, Led.int.name, 'INT')
 
-        self._spacer(grid, 1, 2)
-
-        self._create_led(grid, 3, 1, Led.inte.name, 'INTE')
-        self._create_led(grid, 4, 1, Led.prot.name, 'PROT')
-        self._create_led(grid, 5, 1, Led.memr.name, 'MEMR')
-        self._create_led(grid, 6, 1, Led.inp.name, 'INP')
-        self._create_led(grid, 7, 1, Led.m1.name, 'M1')
-        self._create_led(grid, 8, 1, Led.out.name, 'OUT')
-        self._create_led(grid, 9, 1, Led.hlta.name, 'MLTA')
-        self._create_led(grid, 10, 1, Led.stack.name, 'STACK')
-        self._create_led(grid, 11, 1, Led.wo.name, 'WO')
-        self._create_led(grid, 12, 1, Led.int.name, 'INT')
-
-        self._create_led(grid, 16, 1, Led.d7.name, 'D7')
-        self._create_led(grid, 17, 1, Led.d6.name, 'D6')
-        self._create_led(grid, 18, 1, Led.d5.name, 'D5')
-        self._create_led(grid, 19, 1, Led.d4.name, 'D4')
-        self._create_led(grid, 20, 1, Led.d3.name, 'D3')
-        self._create_led(grid, 21, 1, Led.d2.name, 'D2')
-        self._create_led(grid, 22, 1, Led.d1.name, 'D1')
-        self._create_led(grid, 23, 1, Led.d0.name, 'D0')
-
-        self._spacer(grid, 1, 0)
+        self._create_led(grid, 16, rs, Led.d7.name, 'D7')
+        self._create_led(grid, 17, rs, Led.d6.name, 'D6')
+        self._create_led(grid, 18, rs, Led.d5.name, 'D5')
+        self._create_led(grid, 19, rs, Led.d4.name, 'D4')
+        self._create_led(grid, 20, rs, Led.d3.name, 'D3')
+        self._create_led(grid, 21, rs, Led.d2.name, 'D2')
+        self._create_led(grid, 22, rs, Led.d1.name, 'D1')
+        self._create_led(grid, 23, rs, Led.d0.name, 'D0')
 
     def _init_consts(self):
         self._base_dir = os.path.dirname(__file__)
@@ -345,7 +339,7 @@ class UI:
 
 
     def _trans(self, c):
-        hwnd =c.winfo_id()
+        hwnd = c.winfo_id()
         wnd_exstyle = windll.user32.GetWindowLongA(hwnd, -20)  # GWL_EXSTYLE
         new_exstyle = wnd_exstyle | 0x00080000  # WS_EX_LAYERED
         windll.user32.SetWindowLongA(hwnd, -20, new_exstyle)  # GWL_EXSTYLE
@@ -421,6 +415,10 @@ class UI:
               highlightthickness=0, 
               bg=self.chromakey).grid(row=row, column=col, pady=5)
 
+    def _add_spacers(self, grid):
+        for row in self._row_spaces:
+            self._spacer(grid, 1, row)
+
     def __init__(self):
         self.root = tk.Tk()
         self.display_state = DisplayState()
@@ -432,7 +430,7 @@ class UI:
         r = self.root
         r.title('Altair Emu')
         r.geometry('%sx%s'%(self._win_width, self._win_height))
-        #r.resizable(False, False)
+        r.resizable(False, False)
         r.configure(background='grey')
         print(r.cget('bg'))
         r.grid_columnconfigure(0, weight=1, pad=50)
@@ -449,6 +447,7 @@ class UI:
 
         self._init_leds(self.cvc)
         self._init_toggles(self.cvc)
+        self._add_spacers(self.cvc)
         self._trans(self.cvc)
 
 
