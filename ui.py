@@ -18,6 +18,10 @@ class UI:
     leds : dict = {}
     fonts : list = []
 
+    img_btn_up_red : PhotoImage
+    img_btn_down_red : PhotoImage
+    img_btn_up_blue : PhotoImage
+    img_btn_down_blue : PhotoImage
     img_tgl_up_black : PhotoImage
     img_tgl_down_black : PhotoImage
     img_tgl_up_red : PhotoImage
@@ -35,6 +39,7 @@ class UI:
     img_led_on_white : PhotoImage
     img_led_off_white : PhotoImage
     img_panel_dark : PhotoImage
+
     
 
     cvc : Canvas
@@ -150,19 +155,17 @@ class UI:
                 background=self.chromakey,
                 font=(self._lbl_font, self._lbl_font_sz)
                 ).grid(column=24, row=self._row_addr_sw)
-        # Label(self.cvc,
-        #       text='ALTair 8800',
-        #       background=self.chromakey,
-        #       fg='white',
-        #       font=(self._logo_font, 10)
-        # #).place(x = 10, y= self._win_height+10)
-        # ).grid(column=1, row=15)
 
         self._spacer(grid, 1, 11)
         self._spacer(grid, 1, 12)
         self._spacer(grid, 1, 13)
         self._spacer(grid, 1, 14)
 
+
+    def reset_switch(self, toggle:str):
+        print('RESET: ' + toggle)
+        val = self.display_state.switches[toggle]
+        val.set(1-val.get())
 
     def toggle_switch(self, toggle:str):
         val = self.display_state.switches[toggle]
@@ -214,10 +217,18 @@ class UI:
         led.clr_off = clr_off
         self.leds[name] = led
 
-    def _create_toggle(self, grid, col, row, name, txt='', clr='black'):
+    def _group_lambdas(self, fncs):
+        #return lambda: print('LAMBDAS: %s'%len(fncs))
+        def fnc(*args, **kwargs):
+            for f in fncs:
+                f(*args, **kwargs)
+        return fnc
+
+    def _create_toggle(self, grid, col, row, name, txt='', clr='black', cmd=''):
 
         clr_up = self.img_tgl_up_black
         clr_down = self.img_tgl_down_black
+        commands = []
 
         match clr:
             case 'red':
@@ -232,8 +243,27 @@ class UI:
             case 'green':
                 clr_up = self.img_tgl_up_green
                 clr_down = self.img_tgl_down_green
+            #Reversed for buttons
+            case 'btn_blue':
+                clr_down = self.img_btn_up_blue
+                clr_up = self.img_btn_down_blue
+            case 'btn_red':
+                clr_down = self.img_btn_up_red
+                clr_up = self.img_btn_down_red
             case _:
                 pass
+
+        for c in cmd.split('|'):
+            if c == 'pop': commands.append(lambda:self.root.after(100, self.reset_switch, name))
+            elif c == 'power': pass
+            elif c == 'runstop': pass
+            elif c == 'step': pass
+            elif c == 'examine': pass
+            elif c == 'deposit': pass
+            elif c == 'reset': pass
+            elif c == 'protect': pass
+            elif c == 'tgl_aux': pass
+            elif c == 'addr': pass
 
         tgl = Checkbutton(
             grid, #text=name,
@@ -241,7 +271,7 @@ class UI:
             indicatoron=False,
             selectimage=clr_up,
             image=clr_down,
-            command=partial(self.toggle_switch, name),
+            #command=partial(self.toggle_switch, name),
             variable=self.display_state.switches[name],
             highlightthickness=0, bd=0, border=0,
             bg=self.chromakey, selectcolor=self.chromakey, 
@@ -250,6 +280,7 @@ class UI:
         tgl.grid(
             column=col, row=row, 
             padx=10, sticky=(W, S, E, N))
+        if cmd != '': tgl.configure(command=self._group_lambdas(commands))
         tgl.name = name
         tgl.txt = txt
         self.toggles.append(tgl)
@@ -258,32 +289,32 @@ class UI:
         rc = self._row_ctrl_sw
         ra = self._row_addr_sw
 
-        self._create_toggle(grid, 1, rc, Switch.on_off.name, 'OFF|ON', 'blue')
+        self._create_toggle(grid, 1, rc, Switch.on_off.name, 'OFF|ON', 'white', 'power')
         self._spacer(grid, 2, 8)
-        self._create_toggle(grid, 6, rc, Switch.stop_run.name, 'STOP|RUN')
-        self._create_toggle(grid, 8, rc, Switch.single_step.name, 'SINGLE STEP')
-        self._create_toggle(grid, 10, rc, Switch.examine.name, 'EXAMINE|EXAMINE NEXT')
-        self._create_toggle(grid, 12, rc, Switch.deposit.name, 'DEPOSIT|DEPOSIT NEXT')
-        self._create_toggle(grid, 14, rc, Switch.reset_clr.name,'RESET|CLR')
-        self._create_toggle(grid, 16, rc, Switch.prtct_unprtct.name, 'PROTECT|UNPROTECT')
-        self._create_toggle(grid, 18, rc, Switch.aux1.name, 'AUX1')
-        self._create_toggle(grid, 20, rc, Switch.aux2.name, 'AUX2')
-        self._create_toggle(grid, 6, ra, Switch.addr15.name, '15', 'red')
-        self._create_toggle(grid, 7, ra, Switch.addr14.name, '14', 'red')
-        self._create_toggle(grid, 8, ra, Switch.addr13.name, '13', 'red')
-        self._create_toggle(grid, 9, ra, Switch.addr12.name, '12', 'red')
-        self._create_toggle(grid, 10, ra, Switch.addr11.name, '11', 'red')
-        self._create_toggle(grid, 11, ra, Switch.addr10.name, '10', 'red')
-        self._create_toggle(grid, 12, ra, Switch.addr9.name, '9', 'red')
-        self._create_toggle(grid, 13, ra, Switch.addr8.name, '8', 'red')
-        self._create_toggle(grid, 16, ra, Switch.addr7.name, '7', 'white')
-        self._create_toggle(grid, 17, ra, Switch.addr6.name, '6', 'white')
-        self._create_toggle(grid, 18, ra, Switch.addr5.name, '5', 'white')
-        self._create_toggle(grid, 19, ra, Switch.addr4.name, '4', 'white')
-        self._create_toggle(grid, 20, ra, Switch.addr3.name, '3', 'white')
-        self._create_toggle(grid, 21, ra, Switch.addr2.name, '2', 'white')
-        self._create_toggle(grid, 22, ra, Switch.addr1.name, '1', 'white')
-        self._create_toggle(grid, 23, ra, Switch.addr0.name, '0', 'white')
+        self._create_toggle(grid, 6, rc, Switch.stop_run.name, 'STOP|RUN', 'btn_blue', 'runstop')
+        self._create_toggle(grid, 8, rc, Switch.single_step.name, 'SINGLE STEP', 'btn_blue', 'step|pop')
+        self._create_toggle(grid, 10, rc, Switch.examine.name, 'EXAMINE|EXAMINE NEXT', 'btn_blue', 'examine')
+        self._create_toggle(grid, 12, rc, Switch.deposit.name, 'DEPOSIT|DEPOSIT NEXT', 'btn_blue', 'deposit')
+        self._create_toggle(grid, 14, rc, Switch.reset_clr.name,'RESET|CLR', 'btn_blue', 'reset|pop')
+        self._create_toggle(grid, 16, rc, Switch.prtct_unprtct.name, 'PROTECT|UNPROTECT', 'btn_blue', 'protect')
+        self._create_toggle(grid, 18, rc, Switch.aux1.name, 'AUX1', cmd='tgl_aux')
+        self._create_toggle(grid, 20, rc, Switch.aux2.name, 'AUX2', cmd='tgl_aux')
+        self._create_toggle(grid, 6, ra, Switch.addr15.name, '15', 'red', cmd='addr')
+        self._create_toggle(grid, 7, ra, Switch.addr14.name, '14', 'red', cmd='addr')
+        self._create_toggle(grid, 8, ra, Switch.addr13.name, '13', 'red', cmd='addr')
+        self._create_toggle(grid, 9, ra, Switch.addr12.name, '12', 'red', cmd='addr')
+        self._create_toggle(grid, 10, ra, Switch.addr11.name, '11', 'red', cmd='addr')
+        self._create_toggle(grid, 11, ra, Switch.addr10.name, '10', 'red', cmd='addr')
+        self._create_toggle(grid, 12, ra, Switch.addr9.name, '9', 'red', cmd='addr')
+        self._create_toggle(grid, 13, ra, Switch.addr8.name, '8', 'red', cmd='addr')
+        self._create_toggle(grid, 16, ra, Switch.addr7.name, '7', 'white', cmd='addr')
+        self._create_toggle(grid, 17, ra, Switch.addr6.name, '6', 'white', cmd='addr')
+        self._create_toggle(grid, 18, ra, Switch.addr5.name, '5', 'white', cmd='addr')
+        self._create_toggle(grid, 19, ra, Switch.addr4.name, '4', 'white', cmd='addr')
+        self._create_toggle(grid, 20, ra, Switch.addr3.name, '3', 'white', cmd='addr')
+        self._create_toggle(grid, 21, ra, Switch.addr2.name, '2', 'white', cmd='addr')
+        self._create_toggle(grid, 22, ra, Switch.addr1.name, '1', 'white', cmd='addr')
+        self._create_toggle(grid, 23, ra, Switch.addr0.name, '0', 'white', cmd='addr')
         self._spacer(grid, 24, 6)
 
     def _init_leds(self, grid):
@@ -352,6 +383,19 @@ class UI:
             Image.open(os.path.join(base, 'board.png'))
             ,width=self._win_width, height=self._win_height)
 
+        #Buttons
+        self.img_btn_down_blue = ImageTk.PhotoImage(
+            Image.open(os.path.join(base, 'btn_down_blue_32.png'))
+                ,width=20, height=20)
+        self.img_btn_up_blue = ImageTk.PhotoImage(
+            Image.open(os.path.join(base, 'btn_up_blue_32.png'))
+                ,width=20, height=20)
+        self.img_btn_down_red = ImageTk.PhotoImage(
+            Image.open(os.path.join(base, 'btn_down_red_32.png'))
+                ,width=20, height=20)
+        self.img_btn_up_red = ImageTk.PhotoImage(
+            Image.open(os.path.join(base, 'btn_up_red_32.png'))
+                ,width=20, height=20)
         #Toggles
         self.img_tgl_down_black = ImageTk.PhotoImage(
             Image.open(os.path.join(base, 'toggle_down_black_32.png'))

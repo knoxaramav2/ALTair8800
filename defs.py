@@ -82,44 +82,7 @@ Instr = Enum(
     ]
 )
 
-_clr_power = 'white'
-_clr_ctrl = 'cyan'
-_clr_aux = 'black'
-_clr_a8_15 = 'red'
-_clr_a7_0 = 'white'
-
-def SwitchColor(x : Switch):
-    return {
-        Switch.on_off : _clr_power,
-
-        Switch.stop_run : _clr_ctrl,
-        Switch.single_step : _clr_ctrl,
-        Switch.examine : _clr_ctrl,
-        Switch.deposit : _clr_ctrl,
-        Switch.reset_clr : _clr_ctrl,
-        Switch.prtct_unprtct : _clr_ctrl,
-
-        Switch.aux1 : _clr_aux,
-        Switch.aux2 : _clr_aux,
-
-        Switch.addr0 : _clr_a7_0,
-        Switch.addr1 : _clr_a7_0,
-        Switch.addr2 : _clr_a7_0,
-        Switch.addr3 : _clr_a7_0,
-        Switch.addr4 : _clr_a7_0,
-        Switch.addr5 : _clr_a7_0,
-        Switch.addr6 : _clr_a7_0,
-        Switch.addr7 : _clr_a7_0,
-
-        Switch.addr8 : _clr_a8_15,
-        Switch.addr9 : _clr_a8_15,
-        Switch.addr10 : _clr_a8_15,
-        Switch.addr11 : _clr_a8_15,
-        Switch.addr12 : _clr_a8_15,
-        Switch.addr13 : _clr_a8_15,
-        Switch.addr14 : _clr_a8_15,
-        Switch.addr15 : _clr_a8_15,
-    }.get(x)
-
-def LedColor(x : Led):
-    return 'red'
+#MAX/MINS
+MAX16   : int = 512
+MAX8    : int = 256
+MAX7    : int = 128
