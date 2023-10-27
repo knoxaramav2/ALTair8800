@@ -100,9 +100,6 @@ class UI:
         uy = y+adj_y
         lx = x+((w-(len(lTxt)*cx))/2)
         ly = y+50+adj_y
-        
-        if host.txt != '':
-            print('ADJ (%s %s %s) -> (%s %s, %s %s)'%(uTxt ,x,y,ux,uy,lx,ly))
 
         ulbl = Label(grid, text=uTxt,
             highlightthickness=0, bd=0, border=0,
@@ -163,13 +160,11 @@ class UI:
 
 
     def reset_switch(self, toggle:str):
-        print('RESET: ' + toggle)
         val = self.display_state.switches[toggle]
         val.set(1-val.get())
 
     def toggle_switch(self, toggle:str):
         val = self.display_state.switches[toggle]
-        print('Toggle : '+toggle +' '+str(val.get()))
 
         match toggle:
             case Switch.on_off.name:
@@ -218,7 +213,6 @@ class UI:
         self.leds[name] = led
 
     def _group_lambdas(self, fncs):
-        #return lambda: print('LAMBDAS: %s'%len(fncs))
         def fnc(*args, **kwargs):
             for f in fncs:
                 f(*args, **kwargs)
@@ -476,7 +470,6 @@ class UI:
         r.geometry('%sx%s'%(self._win_width, self._win_height))
         r.resizable(False, False)
         r.configure(background='grey')
-        print(r.cget('bg'))
         r.grid_columnconfigure(0, weight=1, pad=50)
         r.grid_rowconfigure(0, weight=1, pad=50)
 

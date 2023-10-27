@@ -76,13 +76,8 @@ Led = Enum(
     ]
 )
 
-Instr = Enum(
-    'Instr', [
-
-    ]
-)
-
 #MAX/MINS
+MAX32   : int = 1024
 MAX16   : int = 512
 MAX8    : int = 256
 MAX7    : int = 128
