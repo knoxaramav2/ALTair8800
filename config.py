@@ -27,13 +27,14 @@ class __config:
             print('Invalid argument: ' + k +' ' + v)
 
     def __init__(self):
-        print('Init config')
         for i,v in enumerate(sys.argv):
             if i == 0 : continue
             self.__parse_cmd(v)
         pass
 
-Config : __config
+__cnf_inst : __config = None
 
-def Config():
-    return __config()
+def Config(__cnf_inst=__cnf_inst) -> __config:
+    if __cnf_inst == None:
+        __cnf_inst = __config()
+    return __cnf_inst

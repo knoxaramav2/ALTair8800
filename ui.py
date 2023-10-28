@@ -265,7 +265,6 @@ class UI:
             indicatoron=False,
             selectimage=clr_up,
             image=clr_down,
-            #command=partial(self.toggle_switch, name),
             variable=self.display_state.switches[name],
             highlightthickness=0, bd=0, border=0,
             bg=self.chromakey, selectcolor=self.chromakey, 
