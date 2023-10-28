@@ -4,16 +4,17 @@ import os
 from random import randint
 from tkinter import N, W, E, S, Checkbutton, Image, Label, PhotoImage, ttk, Tk, Canvas
 import tkinter as tk
-from state import DisplayState
+from state import SharedState
 from defs import Switch, Led
 from PIL import Image, ImageTk
+from udx import *
 import pyglet
+
 pyglet.options['win32_gdi_font'] = True
 
 class UI:
     
     root : Tk
-    display_state : DisplayState
     toggles : list = []
     leds : dict = {}
     fonts : list = []
@@ -158,22 +159,6 @@ class UI:
         self._spacer(grid, 1, 13)
         self._spacer(grid, 1, 14)
 
-
-    def reset_switch(self, toggle:str):
-        val = self.display_state.switches[toggle]
-        val.set(1-val.get())
-
-    def toggle_switch(self, toggle:str):
-        val = self.display_state.switches[toggle]
-
-        match toggle:
-            case Switch.on_off.name:
-                pwer = val.get()
-                self.update_led(Led.power.name, pwer)
-                if pwer == 1 : self.bootup_fare()
-            case _:
-                pass
-
     def update_led(self, name, state):
         led = self.leds[name]
         if state == 1:
@@ -248,7 +233,7 @@ class UI:
                 pass
 
         for c in cmd.split('|'):
-            if c == 'pop': commands.append(lambda:self.root.after(100, self.reset_switch, name))
+            if c == 'pop': commands.append(lambda:self.root.after(1000, reset_toggle, name))
             elif c == 'power': pass
             elif c == 'runstop': pass
             elif c == 'step': pass
@@ -265,7 +250,7 @@ class UI:
             indicatoron=False,
             selectimage=clr_up,
             image=clr_down,
-            variable=self.display_state.switches[name],
+            variable=self.x_state.switches[name],
             highlightthickness=0, bd=0, border=0,
             bg=self.chromakey, selectcolor=self.chromakey, 
             activebackground=self.chromakey, activeforeground='white'
@@ -458,7 +443,7 @@ class UI:
 
     def __init__(self):
         self.root = tk.Tk()
-        self.display_state = DisplayState()
+        self.x_state = SharedState()
 
         self._init_consts()
         self._load_imgs()
@@ -485,10 +470,3 @@ class UI:
         self._init_toggles(self.cvc)
         self._add_spacers(self.cvc)
         self._trans(self.cvc)
-
-
-
-
-        
-
-
