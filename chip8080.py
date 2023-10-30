@@ -34,6 +34,12 @@ class Chip8080:
     def clear(self):
         pass
 
+    def ip_next(self):
+        self.inst_ptr += 1
+
+    def ip_set(self, addr):
+        self.inst_ptr
+
     def __init__(self):
         self.config = Config()
         self.mem = Memory()

@@ -7,6 +7,11 @@ class __config:
     __mem_size      = MAX16
     __stack_size    = MAX8
 
+    __testMode      = False
+
+    def IsDevMode(self):
+        return self.__testMode
+
     def StackSize(self):
         return self.__stack_size
 
@@ -22,11 +27,12 @@ class __config:
             match k:
                 case '--mem':
                     self.__mem_size = int(v)
-                    pass
                 case _:
                     pass
         elif k[0] == '-' and v == '':
-            pass
+            match k:
+                case '-d':
+                    self.__testMode = True
         else:
             print('Invalid argument: ' + k +' ' + v)
 

@@ -1,11 +1,22 @@
 import numpy as np
 from config import Config
-import defs
 
 class Memory:
 
     stack = []
     heap  = []
+
+    def stack_get(self, idx):
+        return self.stack[idx]
+
+    def stack_set(self, idx, val):
+        self.stack[idx] = val
+
+    def heap_get(self, idx):
+        return self.heap[idx]
+
+    def heap_set(self, idx, val):
+        self.heap[idx] = val
 
     def Reset(self):
         cfg = Config()

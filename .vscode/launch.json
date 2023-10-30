@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--mem=1024", "test"]
+            "args": ["--mem=1024", "-d"]
         }
     ]
 }

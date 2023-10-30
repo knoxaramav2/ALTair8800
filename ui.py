@@ -66,7 +66,6 @@ class UI:
     def run(self):
         self.root.update()
         self._init_labels()
-
         self.root.mainloop()
 
     def bootup_fare(self):
