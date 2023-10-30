@@ -1,10 +1,14 @@
 
 import sys
-from defs import MAX16
+from defs import MAX16, MAX8
 
 class __config:
 
-    __mem_size = MAX16
+    __mem_size      = MAX16
+    __stack_size    = MAX8
+
+    def StackSize(self):
+        return self.__stack_size
 
     def MemSize(self):
         return self.__mem_size
@@ -32,9 +36,10 @@ class __config:
             self.__parse_cmd(v)
         pass
 
-__cnf_inst : __config = None
+__cnf_inst__ : __config = None
 
-def Config(__cnf_inst=__cnf_inst) -> __config:
-    if __cnf_inst == None:
-        __cnf_inst = __config()
-    return __cnf_inst
+def Config():
+    global __cnf_inst__
+    if __cnf_inst__ is None:
+        __cnf_inst__ = __config()
+    return __cnf_inst__

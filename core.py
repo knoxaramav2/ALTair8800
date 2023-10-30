@@ -1,6 +1,6 @@
-from chip8080 import Chip8080
+from chip8080 import Chip8080, GetChip8080
 from clock import Clock
-from mem import Memory
+from mem import GetMemory, Memory
 from ui import UI
 
  
@@ -18,6 +18,6 @@ class Machine:
     def __init__(self) -> None:
 
         self.clock = Clock()
-        self.mem = Memory()
-        self.cpu = Chip8080()
+        self.mem = GetMemory()
+        self.cpu = GetChip8080()
         self.ui = UI()

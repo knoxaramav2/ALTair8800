@@ -81,7 +81,7 @@ class Instr:
 
    #JUMP
    PCHL     = 0b11101001   #LOAD PROGRAM COUNTER (jump PC to addr in HL)
-   JMP      = 0b11000011   #JUMP (jump to address specified by byets 2 and 3)
+   JMP      = 0b11000011   #JUMP (jump to address specified by bytes 2 and 3)
    JC       = 0b11011010   #JUMP IF CARRY ^^^ (if carry bit set)
    JNC      = 0b11010010   #JUMP IF NO CARRY ^^^
    JZ       = 0b11001010   #JUMP IF ZERO ^^^ (if zero bit set)

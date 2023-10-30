@@ -41,8 +41,6 @@ class UI:
     img_led_off_white : PhotoImage
     img_panel_dark : PhotoImage
 
-    
-
     cvc : Canvas
     clb : Canvas
 
@@ -84,6 +82,43 @@ class UI:
             self.root.after(120*i, self.update_led, k, 1)
             self.root.after(120*i+300, self.update_led, k, 0)
     
+    #UI UDX Controls
+
+    def ui_power(self):
+        pass
+
+    def ui_stop_run(self):
+        pass
+
+    def ui_single_step(self):
+        pass
+
+    def ui_examine(self):
+        pass
+
+    def ui_deposit(self):
+        pass
+
+    def ui_deposit(self):
+        pass
+
+    def ui_reset(self):
+        pass
+
+    def ui_protect(self):
+        pass
+
+    def ui_aux(self):
+        pass
+
+    def ui_data_addr(self):
+        pass
+
+    
+    #Misc. UI methods
+    def pop(self, name):
+        pass
+
     #adj_y due to toggle/led height difference
     def _init_label(self, grid, host, x, y, adj_y=0):
         split = host.txt.split('|')
@@ -233,16 +268,16 @@ class UI:
                 pass
 
         for c in cmd.split('|'):
-            if c == 'pop': commands.append(lambda:self.root.after(1000, reset_toggle, name))
-            elif c == 'power': pass
-            elif c == 'runstop': pass
-            elif c == 'step': pass
-            elif c == 'examine': pass
-            elif c == 'deposit': pass
-            elif c == 'reset': pass
-            elif c == 'protect': pass
-            elif c == 'tgl_aux': pass
-            elif c == 'addr': pass
+            if c == 'pop': commands.append(lambda:self.root.after(1000, self.pop, name))
+            elif c == 'power': commands.append(lambda:self.root.after(1000, self.ui_power))
+            elif c == 'runstop': commands.append(lambda:self.root.after(1000, self.ui_stop_run))
+            elif c == 'step': commands.append(lambda:self.root.after(1000, self.ui_single_step))
+            elif c == 'examine': commands.append(lambda:self.root.after(1000, self.ui_examine))
+            elif c == 'deposit': commands.append(lambda:self.root.after(1000, self.ui_deposit))
+            elif c == 'reset': commands.append(lambda:self.root.after(1000, self.ui_reset))
+            elif c == 'protect': commands.append(lambda:self.root.after(1000, self.ui_protect))
+            elif c == 'tgl_aux': commands.append(lambda:self.root.after(1000, self.ui_aux))
+            elif c == 'addr': commands.append(lambda:self.root.after(1000, self.ui_data_addr))
 
         tgl = Checkbutton(
             grid, #text=name,
