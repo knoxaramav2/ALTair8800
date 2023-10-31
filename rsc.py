@@ -1,9 +1,8 @@
-import os
 from tkinter import Image, PhotoImage
-from tkinter.tix import IMAGETEXT
 from os import path
 import pyglet
 from PIL import Image, ImageTk
+from defs import CTRL_XY
 
 from util import GetUtil, Util
 
@@ -19,10 +18,10 @@ class RSC:
     output_photos   : dict = {}    
     board_img       : PhotoImage
 
-    def __load_img(self, file:str):
+    def __load_img(self, file:str) -> PhotoImage:
         return ImageTk.PhotoImage(
-            Image.open(os.path.join(self.__util.rsc_uri, file))
-                ,width=20, height=20)
+            Image.open(path.join(self.__util.rsc_uri, file))
+                ,width=CTRL_XY, height=CTRL_XY)
 
     def __load_msc_imgs(self):
         self.board_img = self.__load_img('board.png')

@@ -12,6 +12,8 @@ ui = UI(
     comp
 )
 
+ui.run()
+
 print('STOP')
 
 

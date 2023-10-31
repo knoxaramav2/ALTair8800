@@ -2,6 +2,8 @@
 
 WIN_X       : int = 1200
 WIN_Y       : int = 550
+CTRL_XY     : int = 20
+CHROMA      : str = '#00008B'
 
 MAX64       : int = 0xFFFFFFFFFFFFFFFF
 MAX32       : int = 0xFFFFFFFF
