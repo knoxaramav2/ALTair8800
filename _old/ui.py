@@ -74,10 +74,11 @@ class UI:
         self.root.mainloop()
 
     #UI UDX Controls
-
     def ui_power(self):
-        self.shr_comp.power_on = 1 - self.shr_comp.power_on
+        #self.shr_comp.power_on = 1 - self.shr_comp.power_on
         print('POWER: %s'%self.shr_comp.power_on)
+        print('flip: %s : %s'%(id(self.shr_comp.power_on), self.shr_comp.power_on))
+        print
 
     def ui_stop_run(self):
         pass
@@ -144,8 +145,6 @@ class UI:
         host.ulabel = ulbl
         host.dlabel = dlbl
 
-        a = Checkbutton()
-        pass
 
     def _init_labels(self):
         grid = self.cvc
@@ -215,6 +214,9 @@ class UI:
         #     highlightthickness=0, bd=0, border=0,
         #     bg=self.chromakey
         # )
+        if name == 'power': print('init: %s : %s'%(id(vrst), vrst))
+        else: print('other led: %s'%id(vrst))
+
         led = Radiobutton(
             grid,
             state='disabled',
@@ -243,10 +245,11 @@ class UI:
                 f(*args, **kwargs)
         return fnc
 
-    def _create_toggle(self, grid, col, row, name, txt='', clr='black', cmd=''):
+    def _create_toggle(self, grid, col, row, name, txt='', vrst:bool=None, clr='black', cmd=''):
 
         clr_up = self.img_tgl_up_black
         clr_down = self.img_tgl_down_black
+        vrst = self.toggle_states[name] if vrst is None else vrst
         commands = []
 
         match clr:
@@ -274,15 +277,15 @@ class UI:
 
         for c in cmd.split('|'):
             if c == 'pop': commands.append(lambda:self.root.after(1000, self.pop, name))
-            elif c == 'power': commands.append(lambda:self.root.after(1000, self.ui_power))
-            elif c == 'runstop': commands.append(lambda:self.root.after(1000, self.ui_stop_run))
-            elif c == 'step': commands.append(lambda:self.root.after(1000, self.ui_single_step))
-            elif c == 'examine': commands.append(lambda:self.root.after(1000, self.ui_examine))
-            elif c == 'deposit': commands.append(lambda:self.root.after(1000, self.ui_deposit))
-            elif c == 'reset': commands.append(lambda:self.root.after(1000, self.ui_reset))
-            elif c == 'protect': commands.append(lambda:self.root.after(1000, self.ui_protect))
-            elif c == 'tgl_aux': commands.append(lambda:self.root.after(1000, self.ui_aux))
-            elif c == 'addr': commands.append(lambda:self.root.after(1000, self.ui_data_addr))
+            elif c == 'power': commands.append(self.ui_power)
+            elif c == 'runstop': commands.append(self.ui_stop_run)
+            elif c == 'step': commands.append(self.ui_single_step)
+            elif c == 'examine': commands.append(self.ui_examine)
+            elif c == 'deposit': commands.append(self.ui_deposit)
+            elif c == 'reset': commands.append(self.ui_reset)
+            elif c == 'protect': commands.append(self.ui_protect)
+            elif c == 'tgl_aux': commands.append(self.ui_aux)
+            elif c == 'addr': commands.append(self.ui_data_addr)
 
         tgl = Checkbutton(
             grid, #text=name,
@@ -290,7 +293,7 @@ class UI:
             indicatoron=False,
             selectimage=clr_up,
             image=clr_down,
-            variable=self.toggle_states[name],
+            variable=vrst,
             highlightthickness=0, bd=0, border=0,
             bg=self.chromakey, selectcolor=self.chromakey, 
             activebackground=self.chromakey, activeforeground='white'
@@ -302,37 +305,36 @@ class UI:
         tgl.name = name
         tgl.txt = txt
         self.toggles.append(tgl)
-
     def _init_toggles(self, grid):
         rc = self._row_ctrl_sw
         ra = self._row_addr_sw
 
-        self._create_toggle(grid, 1, rc, Switch.on_off.name, 'OFF|ON', 'white', 'power')
+        self._create_toggle(grid, 1, rc, Switch.on_off.name, 'OFF|ON', self.shr_comp.power_on, 'white', 'power')
         self._spacer(grid, 2, 8)
-        self._create_toggle(grid, 6, rc, Switch.stop_run.name, 'STOP|RUN', 'btn_blue', 'runstop')
-        self._create_toggle(grid, 8, rc, Switch.single_step.name, 'SINGLE STEP', 'btn_blue', 'step|pop')
-        self._create_toggle(grid, 10, rc, Switch.examine.name, 'EXAMINE|EXAMINE NEXT', 'btn_blue', 'examine')
-        self._create_toggle(grid, 12, rc, Switch.deposit.name, 'DEPOSIT|DEPOSIT NEXT', 'btn_blue', 'deposit')
-        self._create_toggle(grid, 14, rc, Switch.reset_clr.name,'RESET|CLR', 'btn_blue', 'reset|pop')
-        self._create_toggle(grid, 16, rc, Switch.prtct_unprtct.name, 'PROTECT|UNPROTECT', 'btn_blue', 'protect')
+        self._create_toggle(grid, 6, rc, Switch.stop_run.name, 'STOP|RUN', 'btn_blue', None, 'runstop')
+        self._create_toggle(grid, 8, rc, Switch.single_step.name, 'SINGLE STEP', 'btn_blue', None, 'step|pop')
+        self._create_toggle(grid, 10, rc, Switch.examine.name, 'EXAMINE|EXAMINE NEXT', None, 'btn_blue', 'examine')
+        self._create_toggle(grid, 12, rc, Switch.deposit.name, 'DEPOSIT|DEPOSIT NEXT', None, 'btn_blue', 'deposit')
+        self._create_toggle(grid, 14, rc, Switch.reset_clr.name,'RESET|CLR', 'btn_blue', None, 'reset|pop')
+        self._create_toggle(grid, 16, rc, Switch.prtct_unprtct.name, 'PROTECT|UNPROTECT', None, 'btn_blue', 'protect')
         self._create_toggle(grid, 18, rc, Switch.aux1.name, 'AUX1', cmd='tgl_aux')
         self._create_toggle(grid, 20, rc, Switch.aux2.name, 'AUX2', cmd='tgl_aux')
-        self._create_toggle(grid, 6, ra, Switch.addr15.name, '15', 'red', cmd='addr')
-        self._create_toggle(grid, 7, ra, Switch.addr14.name, '14', 'red', cmd='addr')
-        self._create_toggle(grid, 8, ra, Switch.addr13.name, '13', 'red', cmd='addr')
-        self._create_toggle(grid, 9, ra, Switch.addr12.name, '12', 'red', cmd='addr')
-        self._create_toggle(grid, 10, ra, Switch.addr11.name, '11', 'red', cmd='addr')
-        self._create_toggle(grid, 11, ra, Switch.addr10.name, '10', 'red', cmd='addr')
-        self._create_toggle(grid, 12, ra, Switch.addr9.name, '9', 'red', cmd='addr')
-        self._create_toggle(grid, 13, ra, Switch.addr8.name, '8', 'red', cmd='addr')
-        self._create_toggle(grid, 16, ra, Switch.addr7.name, '7', 'white', cmd='addr')
-        self._create_toggle(grid, 17, ra, Switch.addr6.name, '6', 'white', cmd='addr')
-        self._create_toggle(grid, 18, ra, Switch.addr5.name, '5', 'white', cmd='addr')
-        self._create_toggle(grid, 19, ra, Switch.addr4.name, '4', 'white', cmd='addr')
-        self._create_toggle(grid, 20, ra, Switch.addr3.name, '3', 'white', cmd='addr')
-        self._create_toggle(grid, 21, ra, Switch.addr2.name, '2', 'white', cmd='addr')
-        self._create_toggle(grid, 22, ra, Switch.addr1.name, '1', 'white', cmd='addr')
-        self._create_toggle(grid, 23, ra, Switch.addr0.name, '0', 'white', cmd='addr')
+        self._create_toggle(grid, 6, ra, Switch.addr15.name, '15', None, 'red', cmd='addr')
+        self._create_toggle(grid, 7, ra, Switch.addr14.name, '14', None, 'red', cmd='addr')
+        self._create_toggle(grid, 8, ra, Switch.addr13.name, '13', None, 'red', cmd='addr')
+        self._create_toggle(grid, 9, ra, Switch.addr12.name, '12', None, 'red', cmd='addr')
+        self._create_toggle(grid, 10, ra, Switch.addr11.name, '11', None, 'red', cmd='addr')
+        self._create_toggle(grid, 11, ra, Switch.addr10.name, '10', None, 'red', cmd='addr')
+        self._create_toggle(grid, 12, ra, Switch.addr9.name, '9', None, 'red', cmd='addr')
+        self._create_toggle(grid, 13, ra, Switch.addr8.name, '8', None, 'red', cmd='addr')
+        self._create_toggle(grid, 16, ra, Switch.addr7.name, '7', None, 'white', cmd='addr')
+        self._create_toggle(grid, 17, ra, Switch.addr6.name, '6', None, 'white', cmd='addr')
+        self._create_toggle(grid, 18, ra, Switch.addr5.name, '5', None, 'white', cmd='addr')
+        self._create_toggle(grid, 19, ra, Switch.addr4.name, '4', None, 'white', cmd='addr')
+        self._create_toggle(grid, 20, ra, Switch.addr3.name, '3', None, 'white', cmd='addr')
+        self._create_toggle(grid, 21, ra, Switch.addr2.name, '2', None, 'white', cmd='addr')
+        self._create_toggle(grid, 22, ra, Switch.addr1.name, '1', None, 'white', cmd='addr')
+        self._create_toggle(grid, 23, ra, Switch.addr0.name, '0', None, 'white', cmd='addr')
         self._spacer(grid, 24, 6)
 
     def _init_leds(self, grid):
