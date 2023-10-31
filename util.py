@@ -10,13 +10,14 @@ class Util:
     rsc_uri     : str
     font_uri    : str
 
+    
+
     def set_trans(self, c:Canvas):
         hwnd = c.winfo_id()
         wnd_exstyle = windll.user32.GetWindowLongA(hwnd, -20)  # GWL_EXSTYLE
         new_exstyle = wnd_exstyle | 0x00080000  # WS_EX_LAYERED
         windll.user32.SetWindowLongA(hwnd, -20, new_exstyle)  # GWL_EXSTYLE
         windll.user32.SetLayeredWindowAttributes(hwnd, 0x008B0000, 255, 0x00000001)
-
 
     def __load_path(self):
         self.base_uri = os.path.dirname(__file__)

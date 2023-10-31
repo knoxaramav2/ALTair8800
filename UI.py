@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from Controls import *
 from Shared import SharedCPU, SharedMachine, SharedMem
 from defs import *
 from rsc import RSC, GetRSC
@@ -18,7 +18,8 @@ class UI:
     rsc         : RSC
 
     #Control and LEDs
-
+    inputs      : dict = {}
+    outputs     : dict = {}
 
     #UI components
     root        : Tk
@@ -29,6 +30,22 @@ class UI:
         self.root.update()
         #TODO INIT LABELS
         self.root.mainloop()
+
+    def __spacer(self, col, row):
+        Label(self.cvc, bd=0, borderwidth=0,
+              highlightthickness=0, bg=CHROMA).grid(row=row, column=col, pady=5)
+
+    def __init_grid_dim(self):
+        for i in range(0, 25) : self.__spacer(0, i)
+        for i in range(0, 9)  : self.__spacer(i, 0)
+
+    def __init_inputs(self):
+         c = self.cvc
+         self.inputs['power'] = CtrlSwitch(c,1,8, state=sw_state.UD, clr=ctrl_clr.black,
+                    label='OFF|ON', comm='POP|POWER')
+
+    def __init_outputs(self):
+        pass
 
     def __init_ux(self):
         self.root = tk.Tk()
@@ -49,6 +66,7 @@ class UI:
                              relief='ridge'
                              )
         self.cvc.grid(row=0, column=0, pady=10, sticky='NW')
+        self.__init_grid_dim()
 
     def __init__(self, scpu, smem, scmp):
         self.util = GetUtil()
@@ -62,7 +80,7 @@ class UI:
         self.__init_ux()
         self.util.set_trans(self.cvc)
 
-        
+    
         
 
                 

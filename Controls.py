@@ -3,6 +3,8 @@
 from enum import Enum
 from tkinter import Label
 
+from defs import CHROMA
+
 
 sw_state = Enum(
     'SW_STATE', [
@@ -24,20 +26,25 @@ class Ctrl:
     x       : int
     y       : int
     abspos  : bool #pixel placement if true
+    lbl_txt : str
+    label   : Label
 
     def __init__(
-            self, 
-            x, 
-            y, 
-            abspos=False):
+            self, grid,
+            x, y,
+            lbltxt='', abspos=False):
         self.x = x
         self.y = y
         self.abspos = abspos
+        self.lbl_txt = lbltxt
+
+        label = Label(grid,
+                background=CHROMA,
+
+            )
+        label.grid(column=x, row=y, padx=10, sticky='NSEW')
 
 class CtrlSwitch(Ctrl):
-        
-        label       : Label
-
         def __init_ud(self):
              pass
 
@@ -45,15 +52,14 @@ class CtrlSwitch(Ctrl):
              pass
 
         def __init__(
-                  self,
-                  x, 
-                  y, 
+                  self, grid,
+                  x, y, 
                   abspos=False,
                   state:sw_state=sw_state.UMD,
                   clr:ctrl_clr=ctrl_clr.red,
-                  comm:str=''
+                  label:str='', comm:str=''
                   ):
-            super().__init__(x, y, abspos)
+            super().__init__(x, y, grid, abspos, label)
             if state == sw_state.UMD:
                 self.__init_umd()
             else:

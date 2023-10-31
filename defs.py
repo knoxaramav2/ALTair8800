@@ -1,4 +1,8 @@
-
+STAT_ROW    : int = 1
+ADDR_ROW_O  : int = 4
+ADDR_ROW_I  : int = 6
+CTRL_ROW    : int = 8
+SPACERS     : list = [0,2,3,5,7,9,10]
 
 WIN_X       : int = 1200
 WIN_Y       : int = 550
