@@ -1,29 +1,28 @@
 import numpy as np
 from config import Config
+from shared import SharedMemory
 
-class Memory:
+class Memory(SharedMemory):
 
-    stack = []
-    heap  = []
-
-    def stack_get(self, idx):
+    def get_stack(self, idx):
         return self.stack[idx]
 
-    def stack_set(self, idx, val):
+    def set_stack(self, idx, val):
         self.stack[idx] = val
 
-    def heap_get(self, idx):
+    def get_heap(self, idx):
         return self.heap[idx]
 
-    def heap_set(self, idx, val):
-        self.heap[idx] = val
+    # def heap_set(self, idx, val):
+    #     self.heap[idx] = val
 
     def Reset(self):
         cfg = Config()
-        self.stack = np.empty(cfg.StackSize())
-        self.heap = np.empty(cfg.MemSize())
+        self.stack = np.zeros(cfg.StackSize())
+        self.heap = np.zeros(cfg.MemSize())
 
     def __init__(self) -> None:
+        super().__init__()
         self.Reset()
         
 

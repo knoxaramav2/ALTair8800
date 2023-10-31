@@ -1,16 +1,13 @@
-from enum import Enum
 from alu import ALU
-import sys
-from config import Config
-import defs
-from mem import Memory
+from clock import Clock
+from shared import SharedChip, SharedMemory
 
-class Chip8080:
-     
+class Chip8080(SharedChip):
+    
     #special registers
     mem_addr_ptr    : int   #16 bit
-    mem_bffr_ptr    : int   #16 bit
-    inst_ptr        : int   #16 bit
+    
+    inst_reg        : int   #16 bit
     stack_ptr       : int   #16 bit
 
     #working registers
@@ -25,29 +22,33 @@ class Chip8080:
 
     #components
     alu             : ALU
-    mem             : Memory
+    clock           : Clock
+    mem             : SharedMemory
 
-    def deposit(self, byte):
-        
-        pass
+    def deposit(self, data):
+        self.mem.heap_set(self.inst_ptr, data)
 
     def clear(self):
-        pass
+        self.mem_addr_ptr = 0
+        self.mem_bffr_ptr = 0
+        self.inst_ptr = 0
+        self.inst_reg = 0
+        self.stack_ptr = 0
+        self.reg_b = 0
+        self.reg_c = 0
+        self.reg_d = 0
+        self.reg_e = 0
+        self.reg_h = 0
+        self.reg_l = 0
+        self.reg_acc = 0
+        self.reg_stat = 0
 
     def ip_next(self):
         self.inst_ptr += 1
 
-    def ip_set(self, addr):
-        self.inst_ptr
+    def ip_set(self, addr:int):
+        self.inst_ptr = addr
 
     def __init__(self):
-        self.config = Config()
-        self.mem = Memory()
+        self.clear()
 
-__chip_inst__ : Chip8080 = None
-
-def GetChip8080():
-    global __chip_inst__
-    if __chip_inst__ is None:
-        __chip_inst__ = Chip8080()
-    return __chip_inst__

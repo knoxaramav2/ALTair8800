@@ -1,14 +1,13 @@
-from ctypes import windll, byref
-from functools import partial
+from ctypes import windll
 import os
 from random import randint
-from tkinter import N, W, E, S, Checkbutton, Image, Label, PhotoImage, ttk, Tk, Canvas
+from tkinter import N, W, E, S, Checkbutton, Image, IntVar, Label, PhotoImage, Radiobutton, Tk, Canvas
 import tkinter as tk
-from state import SharedState
 from defs import Switch, Led
 from PIL import Image, ImageTk
-from udx import *
 import pyglet
+from shared import *
+
 
 pyglet.options['win32_gdi_font'] = True
 
@@ -16,8 +15,14 @@ class UI:
     
     root : Tk
     toggles : list = []
+    toggle_states : dict = {}
     leds : dict = {}
     fonts : list = []
+
+    #Shared components
+    shr_mem : SharedMemory
+    shr_chip : SharedChip
+    shr_comp : SharedMachine
 
     img_btn_up_red : PhotoImage
     img_btn_down_red : PhotoImage
@@ -61,30 +66,18 @@ class UI:
     _win_width = 1200
     _win_height = 550
 
-    chromakey = '#00008B'#'#333333'
+    chromakey = '#00008B'
 
     def run(self):
         self.root.update()
         self._init_labels()
         self.root.mainloop()
 
-    def bootup_fare(self):
-        t_idx = 0
-        l_idx = 0
-
-        i = 0
-        for k,v in self.leds.items():
-            if k == Led.power.name: 
-                continue
-            
-            i += 1
-            self.root.after(120*i, self.update_led, k, 1)
-            self.root.after(120*i+300, self.update_led, k, 0)
-    
     #UI UDX Controls
 
     def ui_power(self):
-        pass
+        self.shr_comp.power_on = 1 - self.shr_comp.power_on
+        print('POWER: %s'%self.shr_comp.power_on)
 
     def ui_stop_run(self):
         pass
@@ -200,7 +193,7 @@ class UI:
         else:
             led.configure(image=led.clr_off)
 
-    def _create_led(self, grid, col, row, name, txt='', clr='red'):
+    def _create_led(self, grid, col:int, row:int, name:str, vrst:bool=None, txt:str='', clr:str='red'):
 
         clr_on = self.img_led_on_red
         clr_off = self.img_led_off_red
@@ -215,12 +208,25 @@ class UI:
             case _:
                 pass
 
-        led = Label(
-            grid, #text=name,
+        # led = Label(
+        #     grid,
+        #     fg='white',
+        #     image=clr_off,
+        #     highlightthickness=0, bd=0, border=0,
+        #     bg=self.chromakey
+        # )
+        led = Radiobutton(
+            grid,
+            state='disabled',
             fg='white',
+            indicatoron=False,
             image=clr_off,
+            selectimage=clr_on,
+            variable=vrst,
             highlightthickness=0, bd=0, border=0,
-            bg=self.chromakey
+            bg=self.chromakey,
+            selectcolor=self.chromakey,
+            activebackground=self.chromakey
         )
         led.grid(
             column=col, row=row,
@@ -284,7 +290,7 @@ class UI:
             indicatoron=False,
             selectimage=clr_up,
             image=clr_down,
-            variable=self.x_state.switches[name],
+            variable=self.toggle_states[name],
             highlightthickness=0, bd=0, border=0,
             bg=self.chromakey, selectcolor=self.chromakey, 
             activebackground=self.chromakey, activeforeground='white'
@@ -296,7 +302,7 @@ class UI:
         tgl.name = name
         tgl.txt = txt
         self.toggles.append(tgl)
-    #c, r
+
     def _init_toggles(self, grid):
         rc = self._row_ctrl_sw
         ra = self._row_addr_sw
@@ -332,48 +338,50 @@ class UI:
     def _init_leds(self, grid):
         ra = self._row_wait_a0
         rs = self._row_inte_d0
+        addr = self.shr_chip.inst_ptr
+        data = self.shr_chip.mem_bffr_ptr
 
-        self._create_led(grid, 1, 6, Led.power.name, 'POWER', 'green')
-        self._create_led(grid, 3, ra, Led.wait.name, 'WAIT')
-        self._create_led(grid, 4, ra, Led.hlda.name, 'HLDA')
+        self._create_led(grid, 1, 6, Led.power.name, self.shr_comp.power_on, 'POWER', 'green')
+        self._create_led(grid, 3, ra, Led.wait.name, None, 'WAIT')
+        self._create_led(grid, 4, ra, Led.hlda.name, None, 'HLDA')
 
-        self._create_led(grid, 6, ra, Led.a15.name, 'A15')
-        self._create_led(grid, 7, ra, Led.a14.name, 'A14')
-        self._create_led(grid, 8, ra, Led.a13.name, 'A13')
-        self._create_led(grid, 9, ra, Led.a12.name, 'A12')
-        self._create_led(grid, 10, ra, Led.a11.name, 'A11')
-        self._create_led(grid, 11, ra, Led.a10.name, 'A10')
-        self._create_led(grid, 12, ra, Led.a9.name, 'A9')
-        self._create_led(grid, 13, ra, Led.a8.name, 'A8')
+        self._create_led(grid, 6, ra, Led.a15.name, addr&0x10, 'A15')
+        self._create_led(grid, 7, ra, Led.a14.name, addr&0xF, 'A14')
+        self._create_led(grid, 8, ra, Led.a13.name, addr&0xE, 'A13')
+        self._create_led(grid, 9, ra, Led.a12.name, addr&0xD, 'A12')
+        self._create_led(grid, 10, ra, Led.a11.name, addr&0xC, 'A11')
+        self._create_led(grid, 11, ra, Led.a10.name, addr&0xB, 'A10')
+        self._create_led(grid, 12, ra, Led.a9.name, addr&0xA, 'A9')
+        self._create_led(grid, 13, ra, Led.a8.name, addr&0x9, 'A8')
         self._spacer(grid, 14, 3)
         self._spacer(grid, 15, 3)
-        self._create_led(grid, 16, ra, Led.a7.name, 'A7')
-        self._create_led(grid, 17, ra, Led.a6.name, 'A6')
-        self._create_led(grid, 18, ra, Led.a5.name, 'A5')
-        self._create_led(grid, 19, ra, Led.a4.name, 'A4')
-        self._create_led(grid, 20, ra, Led.a3.name, 'A3')
-        self._create_led(grid, 21, ra, Led.a2.name, 'A2')
-        self._create_led(grid, 22, ra, Led.a1.name, 'A1')
-        self._create_led(grid, 23, ra, Led.a0.name, 'A0')
-        self._create_led(grid, 3, rs, Led.inte.name, 'INTE')
-        self._create_led(grid, 4, rs, Led.prot.name, 'PROT')
-        self._create_led(grid, 5, rs, Led.memr.name, 'MEMR')
-        self._create_led(grid, 6, rs, Led.inp.name, 'INP')
-        self._create_led(grid, 7, rs, Led.m1.name, 'M1')
-        self._create_led(grid, 8, rs, Led.out.name, 'OUT')
-        self._create_led(grid, 9, rs, Led.hlta.name, 'MLTA')
-        self._create_led(grid, 10, rs, Led.stack.name, 'STACK')
-        self._create_led(grid, 11, rs, Led.wo.name, 'WO')
-        self._create_led(grid, 12, rs, Led.int.name, 'INT')
+        self._create_led(grid, 16, ra, Led.a7.name, addr&0x8, 'A7')
+        self._create_led(grid, 17, ra, Led.a6.name, addr&0x7, 'A6')
+        self._create_led(grid, 18, ra, Led.a5.name, addr&0x6, 'A5')
+        self._create_led(grid, 19, ra, Led.a4.name, addr&0x5, 'A4')
+        self._create_led(grid, 20, ra, Led.a3.name, addr&0x4, 'A3')
+        self._create_led(grid, 21, ra, Led.a2.name, addr&0x3, 'A2')
+        self._create_led(grid, 22, ra, Led.a1.name, addr&0x2, 'A1')
+        self._create_led(grid, 23, ra, Led.a0.name, addr&0x1, 'A0')
+        self._create_led(grid, 3, rs, Led.inte.name, None, 'INTE')
+        self._create_led(grid, 4, rs, Led.prot.name, None, 'PROT')
+        self._create_led(grid, 5, rs, Led.memr.name, None, 'MEMR')
+        self._create_led(grid, 6, rs, Led.inp.name, None, 'INP')
+        self._create_led(grid, 7, rs, Led.m1.name, None, 'M1')
+        self._create_led(grid, 8, rs, Led.out.name, None, 'OUT')
+        self._create_led(grid, 9, rs, Led.hlta.name, None, 'MLTA')
+        self._create_led(grid, 10, rs, Led.stack.name, None, 'STACK')
+        self._create_led(grid, 11, rs, Led.wo.name, None, 'WO')
+        self._create_led(grid, 12, rs, Led.int.name, None, 'INT')
 
-        self._create_led(grid, 16, rs, Led.d7.name, 'D7')
-        self._create_led(grid, 17, rs, Led.d6.name, 'D6')
-        self._create_led(grid, 18, rs, Led.d5.name, 'D5')
-        self._create_led(grid, 19, rs, Led.d4.name, 'D4')
-        self._create_led(grid, 20, rs, Led.d3.name, 'D3')
-        self._create_led(grid, 21, rs, Led.d2.name, 'D2')
-        self._create_led(grid, 22, rs, Led.d1.name, 'D1')
-        self._create_led(grid, 23, rs, Led.d0.name, 'D0')
+        self._create_led(grid, 16, rs, Led.d7.name, data&0x8, 'D7')
+        self._create_led(grid, 17, rs, Led.d6.name, data&0x7, 'D6')
+        self._create_led(grid, 18, rs, Led.d5.name, data&0x6, 'D5')
+        self._create_led(grid, 19, rs, Led.d4.name, data&0x5, 'D4')
+        self._create_led(grid, 20, rs, Led.d3.name, data&0x4, 'D3')
+        self._create_led(grid, 21, rs, Led.d2.name, data&0x3, 'D2')
+        self._create_led(grid, 22, rs, Led.d1.name, data&0x2, 'D1')
+        self._create_led(grid, 23, rs, Led.d0.name, data&0x1, 'D0')
 
     def _init_consts(self):
         self._base_dir = os.path.dirname(__file__)
@@ -465,7 +473,6 @@ class UI:
         self._logo_font = 'Rawhide Raw 2012'
         self._lbl_font = 'Basil Gothic NBP'
 
-
     def _spacer(self, grid, col=0, row = 0):
         Label(grid, bd=0, borderwidth=0, 
               highlightthickness=0, 
@@ -475,13 +482,26 @@ class UI:
         for row in self._row_spaces:
             self._spacer(grid, 1, row)
 
-    def __init__(self):
-        self.root = tk.Tk()
-        self.x_state = SharedState()
+    def _init_states(self):
+        for s in Switch:
+            self.toggle_states[s.name] = IntVar(value=0)
+        self.toggle_states[Switch.on_off] = True
 
+    def __init__(self,
+                    shr_mem:SharedMemory,
+                    shr_chp:SharedChip,
+                    shr_comp:SharedMachine
+                 ):
+        self.root = tk.Tk()
+
+        self.shr_mem = shr_mem
+        self.shr_chip = shr_chp
+        self.shr_comp = shr_comp
+        
         self._init_consts()
         self._load_imgs()
         self._load_fonts()
+        self._init_states()
 
         r = self.root
         r.title('Altair Emu')
