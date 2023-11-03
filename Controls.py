@@ -3,7 +3,7 @@
 from enum import Enum
 from tkinter import Button, Canvas, Checkbutton, Label
 
-from defs import CHROMA
+from defs import BOX_SZ, CHROMA
 from rsc import GetRSC
 
 #INPUTS
@@ -59,6 +59,14 @@ class CtrlSwitch(Ctrl):
                     self.ctrl_up = rsc.input_photos['tgl_up_black']
                     self.ctrl_mid = rsc.input_photos['tgl_mid_black']
                     self.ctrl_down = rsc.input_photos['tgl_down_black']
+                case ctrl_clr.red:
+                    self.ctrl_up = rsc.input_photos['tgl_up_red']
+                    self.ctrl_mid = rsc.input_photos['tgl_mid_red']
+                    self.ctrl_down = rsc.input_photos['tgl_down_red']
+                case ctrl_clr.blue:
+                    self.ctrl_up = rsc.input_photos['tgl_up_blue']
+                    self.ctrl_mid = rsc.input_photos['tgl_mid_blue']
+                    self.ctrl_down = rsc.input_photos['tgl_down_blue']
                 case _:
                     pass
 
@@ -79,7 +87,8 @@ class CtrlSwitchUD(CtrlSwitch):
             activebackground=CHROMA, activeforeground=CHROMA,
             selectcolor=CHROMA, bg=CHROMA,
             indicatoron=False,
-            selectimage=self.ctrl_up, image=self.ctrl_down
+            selectimage=self.ctrl_up, image=self.ctrl_down,
+            #width=BOX_SZ
         )
         ctrl.grid(column=x, row=y, padx=10, sticky='NSEW')
 
@@ -92,7 +101,8 @@ class CtrlSwitchUWD(CtrlSwitch):
             fg='white',
             border=0, bd=0, highlightthickness=0,
             activebackground=CHROMA, activeforeground=CHROMA,
-            bg=CHROMA, image=self.ctrl_mid
+            bg=CHROMA, image=self.ctrl_mid,
+            #width=BOX_SZ
         )
         ctrl_u.grid(column=x, row=y, padx=10, sticky='NSEW')
 
@@ -112,7 +122,8 @@ class CtrlButton(Ctrl):
             grid, text='TEST BUTTON', fg='white',
             border=0, bd=0, highlightthickness=0,
             activebackground=CHROMA, activeforeground=CHROMA,
-            bg=CHROMA, image=self.ctrl_up
+            bg=CHROMA, image=self.ctrl_up,
+            #width=BOX_SZ
         )
         ctrl.grid(column=x, row=y, padx=10, sticky='NSEW')
 
@@ -140,7 +151,8 @@ class Led(Ctrl):
                 activebackground=CHROMA, activeforeground=CHROMA,
                 state='disabled',
                 bg=CHROMA, image=self.ctrl_off,
-                indicatoron=False
+                indicatoron=False,
+            #width=BOX_SZ
         )
 
         led.grid(column=x, row=y, padx=10, sticky='NSEW')
