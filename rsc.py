@@ -41,15 +41,15 @@ class RSC:
         self.input_photos['btn_down_blue'] = self.__load_img('btn_down_blue_32.png')
 
     def __load_tgl_imgs(self):
-        self.output_photos['tgl_up_black'] = self.__load_img('tgl_up_black_32.png')
-        self.output_photos['tgl_mid_black'] = self.__load_img('tgl_mid_black_32.png')
-        self.output_photos['tgl_down_black'] = self.__load_img('tgl_down_black_32.png')
-        self.output_photos['tgl_up_red'] = self.__load_img('tgl_up_red_32.png')
-        self.output_photos['tgl_mid_red'] = self.__load_img('tgl_mid_red_32.png')
-        self.output_photos['tgl_down_red'] = self.__load_img('tgl_down_red_32.png')
-        self.output_photos['tgl_up_blue'] = self.__load_img('tgl_up_blue_32.png')
-        self.output_photos['tgl_mid_blue'] = self.__load_img('tgl_mid_blue_32.png')
-        self.output_photos['tgl_down_blue'] = self.__load_img('tgl_down_blue_32.png')
+        self.input_photos['tgl_up_black'] = self.__load_img('tgl_up_black_32.png')
+        self.input_photos['tgl_mid_black'] = self.__load_img('tgl_mid_black_32.png')
+        self.input_photos['tgl_down_black'] = self.__load_img('tgl_down_black_32.png')
+        self.input_photos['tgl_up_red'] = self.__load_img('tgl_up_red_32.png')
+        self.input_photos['tgl_mid_red'] = self.__load_img('tgl_mid_red_32.png')
+        self.input_photos['tgl_down_red'] = self.__load_img('tgl_down_red_32.png')
+        self.input_photos['tgl_up_blue'] = self.__load_img('tgl_up_blue_32.png')
+        self.input_photos['tgl_mid_blue'] = self.__load_img('tgl_mid_blue_32.png')
+        self.input_photos['tgl_down_blue'] = self.__load_img('tgl_down_blue_32.png')
 
     def __load_fonts(self):
         pyglet.font.add_directory(self.__util.font_uri)

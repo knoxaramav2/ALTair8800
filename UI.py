@@ -36,16 +36,30 @@ class UI:
               highlightthickness=0, bg=CHROMA).grid(row=row, column=col, pady=5)
 
     def __init_grid_dim(self):
-        for i in range(0, 25) : self.__spacer(0, i)
-        for i in range(0, 9)  : self.__spacer(i, 0)
+        #for i in range(0, 25) : self.__spacer(i, 0)
+        #for i in range(0, 9)  : self.__spacer(0, i)
+        for i in range(0, 25):
+            for j in range(0, 9):
+                self.__spacer(i, j)
 
     def __init_inputs(self):
-         c = self.cvc
-         self.inputs['power'] = CtrlSwitch(c,1,8, state=sw_state.UD, clr=ctrl_clr.black,
-                    label='OFF|ON', comm='POP|POWER')
+        row_ctrl = 8
+        row_addr = 6
+        c = self.cvc
+        self.inputs['power'] = CtrlSwitchUD(c, 2,row_ctrl, 
+            ctrl_clr.black, 'OFF|ON', 'POP|POWER')
+        self.inputs['runstop'] = CtrlSwitchUWD(c, 6, row_ctrl,
+            ctrl_clr.black, 'STOP|RUN', 'STOP|RUN')
+        self.inputs['runstop'] = CtrlButton(c, 8, row_ctrl,
+            ctrl_clr.blue, 'STEP', 'STEP')
 
     def __init_outputs(self):
-        pass
+        c = self.cvc
+        ra = 4
+        rs = 1
+        self.outputs['power'] = Led(
+            c, 1, 8, ctrl_clr.green, 'POWER'
+        )
 
     def __init_ux(self):
         self.root = tk.Tk()
@@ -67,6 +81,8 @@ class UI:
                              )
         self.cvc.grid(row=0, column=0, pady=10, sticky='NW')
         self.__init_grid_dim()
+        self.__init_inputs()
+        self.__init_outputs()
 
     def __init__(self, scpu, smem, scmp):
         self.util = GetUtil()

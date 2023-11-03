@@ -306,8 +306,8 @@ class UI:
         tgl.txt = txt
         self.toggles.append(tgl)
     def _init_toggles(self, grid):
-        rc = self._row_ctrl_sw
-        ra = self._row_addr_sw
+        rc = self._row_ctrl_sw#8
+        ra = self._row_addr_sw#6
 
         self._create_toggle(grid, 1, rc, Switch.on_off.name, 'OFF|ON', self.shr_comp.power_on, 'white', 'power')
         self._spacer(grid, 2, 8)
