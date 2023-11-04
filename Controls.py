@@ -1,7 +1,7 @@
 
 
 from enum import Enum
-from tkinter import Button, Canvas, Checkbutton, Label
+from tkinter import Button, Canvas, Checkbutton, Label, PhotoImage
 
 from defs import BOX_SZ, CHROMA
 from rsc import GetRSC
@@ -15,15 +15,63 @@ sw_state = Enum(
 
 ctrl_clr = Enum(
     'CTRL_CLR', [
-        'red', 
-        'green',
-        'blue',
-        'black',
-        'white'
+        'btn_blue',
+        'btn_red',
+
+        'swt_black',
+        'swt_blue',
+        'swt_red',
+
+        'led_grn',
+        'led_red',
+        'led_wht',
     ]
 )
 
-def create_fnc_list(self, fncs:str):
+ctrl_type = Enum(
+    'ctrl_type',[
+        'btn', 'sw2', 'sw3', 'led'
+    ]
+)
+
+def get_imgs(img_fam:str):
+    cols = []
+    rsc = GetRSC()
+    match img_fam:
+        case ctrl_clr.btn_blue:
+            cols.append(rsc.input_photos['btn_down_blue'])
+            cols.append(rsc.input_photos['btn_up_blue'])
+        case ctrl_clr.btn_red:
+            cols.append(rsc.input_photos['btn_down_red'])
+            cols.append(rsc.input_photos['btn_up_red'])
+
+        case ctrl_clr.swt_black:
+            cols.append(rsc.input_photos['tgl_down_black'])
+            cols.append(rsc.input_photos['tgl_mid_black'])
+            cols.append(rsc.input_photos['tgl_up_black'])
+        case ctrl_clr.swt_blue:
+            cols.append(rsc.input_photos['tgl_down_blue'])
+            cols.append(rsc.input_photos['tgl_mid_blue'])
+            cols.append(rsc.input_photos['tgl_up_blue'])
+        case ctrl_clr.swt_red:
+            cols.append(rsc.input_photos['tgl_down_red'])
+            cols.append(rsc.input_photos['tgl_mid_red'])
+            cols.append(rsc.input_photos['tgl_up_red'])
+
+        case ctrl_clr.led_grn:
+            cols.append(rsc.output_photos['led_off_green'])
+            cols.append(rsc.output_photos['led_on_green'])
+        case ctrl_clr.led_red:
+            cols.append(rsc.output_photos['led_off_red'])
+            cols.append(rsc.output_photos['led_on_red'])
+        case ctrl_clr.led_wht:
+            cols.append(rsc.output_photos['led_off_white'])
+            cols.append(rsc.output_photos['led_on_white'])
+        case _:
+            pass
+    return cols
+
+def create_fnc_list(fncs:str):
     fnc_list = fncs.split('|')
     for f in fnc_list:
         match f:
@@ -43,116 +91,40 @@ class Ctrl:
     upper_lbl       :   Label
     lower_lbl       :   Label
 
-    def __init__(self, cvc, lbl:str) -> None:
+    state           :   int
+    imgs            :   [PhotoImage]
+
+    base            : any = None
+    var             : any = None
+    type            : ctrl_type
+
+    def __init__(self, cvc, x, y, 
+                 lbl:str, img_fam:ctrl_clr, type:ctrl_type, comm=None) -> None:
         self.grid = cvc
         spl_str = lbl.split('|')
         ln = len(spl_str)
         self.upper_text = spl_str[0] if ln >= 1 else ''
         self.lower_text = spl_str[1] if ln >= 2 else ''
+        self.imgs = get_imgs(img_fam)
+
+        if type == ctrl_type.led:
+            self.base = Checkbutton(
+                cvc, #state='disabled',
+                activebackground=CHROMA, selectcolor=CHROMA,
+                selectimage=self.imgs[1],
+                command=comm,
+                variable=self.var, indicatoron=False
+            )
+        
+        self.base.configure(image=self.imgs[0])
+        self.base.configure(bd=0, borderwidth=0, width=BOX_SZ, height=BOX_SZ)
+        self.base.configure(bg=CHROMA)
+        self.base.grid(column=x, row=y, padx=5, pady=5, sticky='NSEW')
+
+class CtrlLed(Ctrl):
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr) -> None:
+        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.led)
 
 class CtrlSwitch(Ctrl):
-
-        def __get_imgs(self, clr:str):
-            rsc = GetRSC()
-            match clr:
-                case ctrl_clr.black:
-                    self.ctrl_up = rsc.input_photos['tgl_up_black']
-                    self.ctrl_mid = rsc.input_photos['tgl_mid_black']
-                    self.ctrl_down = rsc.input_photos['tgl_down_black']
-                case ctrl_clr.red:
-                    self.ctrl_up = rsc.input_photos['tgl_up_red']
-                    self.ctrl_mid = rsc.input_photos['tgl_mid_red']
-                    self.ctrl_down = rsc.input_photos['tgl_down_red']
-                case ctrl_clr.blue:
-                    self.ctrl_up = rsc.input_photos['tgl_up_blue']
-                    self.ctrl_mid = rsc.input_photos['tgl_mid_blue']
-                    self.ctrl_down = rsc.input_photos['tgl_down_blue']
-                case _:
-                    pass
-
-        def __init__(
-                  self, grid, clr, lbl
-                  ):
-            super().__init__(grid, lbl)
-            self.__get_imgs(clr)
-
-class CtrlSwitchUD(CtrlSwitch):
-    
-    def __init__(self, grid, x, y, clr, txt, comm):
-        super().__init__(grid, clr, txt)
-        ctrl = Checkbutton(
-            grid, text="TEST TEXT",
-            fg='white',
-            border=0, bd=0, highlightthickness=0,
-            activebackground=CHROMA, activeforeground=CHROMA,
-            selectcolor=CHROMA, bg=CHROMA,
-            indicatoron=False,
-            selectimage=self.ctrl_up, image=self.ctrl_down,
-            #width=BOX_SZ
-        )
-        ctrl.grid(column=x, row=y, padx=10, sticky='NSEW')
-
-class CtrlSwitchUWD(CtrlSwitch):
-
-    def __init__(self, grid, x, y, clr, txt, comm):
-        super().__init__(grid, clr, txt)
-        ctrl_u = Button(
-            grid, text="TEST UWD",
-            fg='white',
-            border=0, bd=0, highlightthickness=0,
-            activebackground=CHROMA, activeforeground=CHROMA,
-            bg=CHROMA, image=self.ctrl_mid,
-            #width=BOX_SZ
-        )
-        ctrl_u.grid(column=x, row=y, padx=10, sticky='NSEW')
-
-
-class CtrlButton(Ctrl):
-    def __init__(self, grid, x, y, clr, txt, comm):
-        super().__init__(grid, txt)
-        rsc = GetRSC()
-        match clr:
-            case ctrl_clr.blue:
-                self.ctrl_up = rsc.input_photos['btn_up_blue']
-                self.ctrl_down = rsc.input_photos['btn_down_blue']
-            case _:
-                pass
-
-        ctrl = Button(
-            grid, text='TEST BUTTON', fg='white',
-            border=0, bd=0, highlightthickness=0,
-            activebackground=CHROMA, activeforeground=CHROMA,
-            bg=CHROMA, image=self.ctrl_up,
-            #width=BOX_SZ
-        )
-        ctrl.grid(column=x, row=y, padx=10, sticky='NSEW')
-
-#OUTPUTS
-class Led(Ctrl):
-    def __init__(self, grid, x, y, clr, lbl: str) -> None:
-        super().__init__(grid, lbl)
-        rsc=GetRSC()
-        match clr:
-            case ctrl_clr.green:
-                self.ctrl_on = rsc.output_photos['led_on_green']
-                self.ctrl_off = rsc.output_photos['led_off_green']
-            case ctrl_clr.white:
-                self.ctrl_on = rsc.output_photos['led_on_white']
-                self.ctrl_off = rsc.output_photos['led_off_white']
-            case ctrl_clr.red:
-                self.ctrl_on = rsc.output_photos['led_on_red']
-                self.ctrl_off = rsc.output_photos['led_off_red']
-            case _:
-                pass
-
-        led = Checkbutton(
-            grid, text='TEST BUTTON', fg='white',
-                border=0, bd=0, highlightthickness=0,
-                activebackground=CHROMA, activeforeground=CHROMA,
-                state='disabled',
-                bg=CHROMA, image=self.ctrl_off,
-                indicatoron=False,
-            #width=BOX_SZ
-        )
-
-        led.grid(column=x, row=y, padx=10, sticky='NSEW')
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr) -> None:
+        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.led)

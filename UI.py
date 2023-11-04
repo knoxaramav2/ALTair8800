@@ -26,6 +26,10 @@ class UI:
     cvc         : Canvas
     chroma      : str
 
+    #Misc
+    rsc         : RSC
+    util        : Util
+
     def run(self):
         self.root.update()
         #TODO INIT LABELS
@@ -47,10 +51,10 @@ class UI:
         tb = GetRSC().input_photos['tgl_up_blue']
         tr = GetRSC().input_photos['tgl_up_red']
         for x in range(0,COLS):
-            #self.__spacer(x, 0)
-            for y in range(0, ROWS):
-                self.__spacer(x, y, w)
-
+            self.__spacer(x, 0, w)
+        for y in range(0, ROWS):
+            self.__spacer(0, y, w)
+        return
         #ADDR
         sk = 0
         clr = g
@@ -115,40 +119,40 @@ class UI:
             self.cvc.grid_rowconfigure(row, minsize=BOX_SZ)
 
     def __init_inputs(self):
-        row_ctrl = 8
-        row_addr = 6
         c = self.cvc
-        # self.inputs['power'] = CtrlSwitchUD(c, 2,row_ctrl, 
-        #     ctrl_clr.black, 'OFF|ON', 'POP|POWER')
-        # self.inputs['runstop'] = CtrlSwitchUWD(c, 6, row_ctrl,
-        #     ctrl_clr.black, 'STOP|RUN', 'STOP|RUN')
-        # self.inputs['runstop'] = CtrlButton(c, 8, row_ctrl,
-        #     ctrl_clr.blue, 'STEP', 'STEP')
+        
+        #ADDR
+        sk = 0
+        clr = ctrl_clr.swt_red
+        offset = 7
+        for i in range(0, 16):
+            if i == 8: clr = ctrl_clr.swt_black
+            pos = i+offset+sk
+            CtrlSwitch(c, pos, ADDR_ROW_I, str(i), clr)
+            if (i+3)%3 == 0: sk += 1
 
-        offset=4
-        for i in range(0, 8):
-            CtrlSwitchUD(c, i+offset, ADDR_ROW_I, ctrl_clr.black,'', '')
-        for i in range(8, 16):
-            CtrlSwitchUD(c, i+offset+2, ADDR_ROW_I, ctrl_clr.red, '', '')
 
     def __init_outputs(self):
         c = self.cvc
-        
-        self.outputs['power'] = Led(
-            c, 1, CTRL_ROW-1, ctrl_clr.green, 'POWER'
-        )
-        self.outputs['power'] = Led(
-            c, 1, ADDR_ROW_O, ctrl_clr.green, 'WAIT'
-        )
-        self.outputs['power'] = Led(
-            c, 2, ADDR_ROW_O, ctrl_clr.green, 'HLDA'
-        )
-        offset=5
-        for i in range(0, 8):
-            Led(c, i+offset, ADDR_ROW_O, ctrl_clr.red, 'A%s'%i)
-        for i in range(8, 16):
-            Led(c, i+offset+2, ADDR_ROW_O, ctrl_clr.red, 'A%s'%i)
 
+        #ADDR
+        sk = 0
+        offset = 7
+        for i in range(0, 16):
+            pos = i+offset+sk
+            CtrlLed(c, pos, ADDR_ROW_O, 'A%s'%i, ctrl_clr.led_red)
+            if (i+3)%3 == 0: sk += 1
+
+        #STATUS
+        offset = 3
+        status = ['INTE', '']#Todo shared dictionary
+        for i in range(len(status)):
+            s = status[i]
+            CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red)
+
+        #HALT
+        CtrlLed(c, 3, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red)
+        CtrlLed(c, 4, ADDR_ROW_O, 'SINGLE\nSTEP', ctrl_clr.led_red)
 
     def __init_ux(self):
         self.root = tk.Tk()
@@ -169,9 +173,12 @@ class UI:
                              relief='ridge'
                              )
         self.cvc.grid(sticky='NW')
+
+        self.rsc  = GetRSC()
+
         self.__init_grid_dim()
-        #self.__init_inputs()
-        #self.__init_outputs()
+        self.__init_inputs()
+        self.__init_outputs()
 
     def __init__(self, scpu, smem, scmp):
         self.util = GetUtil()
