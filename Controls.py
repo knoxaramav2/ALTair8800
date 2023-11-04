@@ -1,7 +1,7 @@
 
 
 from enum import Enum
-from tkinter import Button, Canvas, Checkbutton, Label, PhotoImage
+from tkinter import Button, Canvas, Checkbutton, Label, PhotoImage, Widget
 
 from defs import BOX_SZ, CHROMA
 from rsc import GetRSC
@@ -94,7 +94,7 @@ class Ctrl:
     state           :   int
     imgs            :   [PhotoImage]
 
-    base            : any = None
+    base            : Widget
     var             : any = None
     type            : ctrl_type
 
@@ -112,11 +112,29 @@ class Ctrl:
                 cvc, #state='disabled',
                 activebackground=CHROMA, selectcolor=CHROMA,
                 selectimage=self.imgs[1],
+                image=self.imgs[0],
                 command=comm,
                 variable=self.var, indicatoron=False
             )
+        elif type == ctrl_type.sw2:
+            self.base = Checkbutton(
+                cvc, #state='disabled',
+                activebackground=CHROMA, selectcolor=CHROMA,
+                selectimage=self.imgs[2],
+                image=self.imgs[0],
+                command=comm,
+                variable=self.var, indicatoron=False
+        )
+        elif type == ctrl_type.sw3:
+            self.base = Label(
+                cvc, image=self.imgs[1]
+            )
+        elif type == ctrl_type.btn:
+            self.base = Button(
+                cvc, image=self.imgs[0],
+                activebackground=CHROMA,
+            )
         
-        self.base.configure(image=self.imgs[0])
         self.base.configure(bd=0, borderwidth=0, width=BOX_SZ, height=BOX_SZ)
         self.base.configure(bg=CHROMA)
         self.base.grid(column=x, row=y, padx=5, pady=5, sticky='NSEW')
@@ -126,5 +144,11 @@ class CtrlLed(Ctrl):
         super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.led)
 
 class CtrlSwitch(Ctrl):
-    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr) -> None:
-        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.led)
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr, twopoint=True) -> None:
+        type = ctrl_type.sw2 if twopoint else ctrl_type.sw3
+        super().__init__(cvc, x, y, lbl, img_fam, type)
+        if not twopoint: self.base.configure(image=self.imgs[1])
+
+class CtrlButton(Ctrl):
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr, comm=None) -> None:
+        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.btn, comm)

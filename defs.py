@@ -1,5 +1,5 @@
 ROWS        : int = 9
-COLS        : int = 29
+COLS        : int = 26
 STAT_ROW    : int = 1
 ADDR_ROW_O  : int = 3
 ADDR_ROW_I  : int = 5
