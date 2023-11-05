@@ -1,4 +1,5 @@
 from Controls import *
+from Shared import *
 
 
 def toggle_ctrl(ctrl:CtrlSwitch):
@@ -13,13 +14,15 @@ def toggle_ctrl(ctrl:CtrlSwitch):
     else:
         ctrl.base.configure(image=ctrl.imgs[0])
     ctrl.base.after(200, lambda:ctrl.base.configure(image=ctrl.imgs[1]))
-    ctrl.state = 1-ctrl.state
 
 def click_ctrl(ctrl:CtrlButton):
     print('CLICK CTRL')
+    ctrl.base.configure(image=ctrl.imgs[0])
+    ctrl.base.after(100, lambda:ctrl.base.configure(image=ctrl.imgs[1]))
 
 def toggle_addr(ctrl:CtrlSwitch):
     print('TOGGLE ADDR')
 
-def toggle_power(ctrl:CtrlSwitch):
-    print('TOGGLE POWER')
+def toggle_power(ctrl:CtrlSwitch, scmp:SharedMachine):
+    b = scmp.power_on.get()
+    print('TOGGLE POWER : %s'%b)

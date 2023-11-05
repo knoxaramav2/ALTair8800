@@ -1,4 +1,8 @@
 
+import tkinter as tk
+from tkinter import BooleanVar, IntVar, Tk
+
+
 class SharedMem:
     data            : [int]
     curr_data       : int
@@ -16,5 +20,8 @@ class SharedCPU(SharedMem):
         self.curr_data = data
         
 class SharedMachine:
-    power_on        : int
+    power_on        : BooleanVar
 
+    def __init__(self, tk:Tk) -> None:
+        self.power_on = BooleanVar(tk, value=False)
+        

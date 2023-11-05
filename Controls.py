@@ -1,7 +1,7 @@
 
 
 from enum import Enum
-from tkinter import BooleanVar, Button, Canvas, Checkbutton, Frame, Label, PhotoImage, Radiobutton, Widget
+from tkinter import BooleanVar, Button, Canvas, Checkbutton, Frame, IntVar, Label, PhotoImage, Radiobutton, Variable, Widget
 
 from defs import BOX_SZ, CHROMA, IMG_SZ
 from rsc import GetRSC
@@ -87,6 +87,7 @@ def create_fnc_list(fncs:str):
                 pass
 
 class Ctrl:
+
     grid            :   Canvas
 
     upper_text      :   str = ''
@@ -95,18 +96,16 @@ class Ctrl:
     upper_lbl       :   Label
     lower_lbl       :   Label
 
-    state           :   int = 0
+    state           :   IntVar
     imgs            :   [PhotoImage]
 
     base            : Widget
-    var             : any = None
+    var             : Variable = None
     type            : ctrl_type
 
-    def t(self, t):
-        print(t.y)
-
     def __init__(self, cvc, x, y, 
-                 lbl:str, img_fam:ctrl_clr, type:ctrl_type):
+                 lbl:str, img_fam:ctrl_clr, type:ctrl_type, var:Variable=None):
+        self.var = var
         self.grid = cvc
         self.type = type
         spl_str = lbl.split('|')
@@ -114,11 +113,11 @@ class Ctrl:
         self.upper_text = spl_str[0] if ln >= 1 else ''
         self.lower_text = spl_str[1] if ln >= 2 else ''
         self.imgs = get_imgs(img_fam)
-
         if type == ctrl_type.led:
-            self.base = Radiobutton(
-                cvc,# state='disabled',
+            self.base = Checkbutton(
+                cvc, state='disabled',
                 activebackground=CHROMA, selectcolor=CHROMA,
+                background=CHROMA,#Needs to be here too for some reason
                 selectimage=self.imgs[1],
                 image=self.imgs[0],
                 variable=self.var,
@@ -127,7 +126,7 @@ class Ctrl:
 
         elif type == ctrl_type.sw2:
             self.base = Checkbutton(
-                cvc, #state='disabled',
+                cvc,
                 activebackground=CHROMA, selectcolor=CHROMA,
                 selectimage=self.imgs[2],
                 image=self.imgs[0],
@@ -141,11 +140,10 @@ class Ctrl:
             )
         elif type == ctrl_type.btn:
             self.base = Button(
-                cvc, image=self.imgs[0],
+                cvc, image=self.imgs[1],
                 activebackground=CHROMA,
             )
-        #self.base.bind('<Motion>', self.t)
-        self.base.configure(bd=0, borderwidth=0, width=BOX_SZ, height=BOX_SZ)
+        self.base.configure(bd=0, borderwidth=0, background=CHROMA, width=BOX_SZ, height=BOX_SZ)
         self.base.configure(bg=CHROMA)
         self.base.grid(column=x, row=y, padx=5, pady=5, sticky='NSEW')
 
@@ -154,14 +152,14 @@ class Ctrl:
         return self
 
 class CtrlLed(Ctrl):
-    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr):
-        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.led)
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr, var:any=None):
+        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.led, var)
 
 class CtrlSwitch(Ctrl):
-    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr, twopoint=True):
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr, twopoint=True, var:any=None):
         type = ctrl_type.sw2 if twopoint else ctrl_type.sw3
-        super().__init__(cvc, x, y, lbl, img_fam, type)
+        super().__init__(cvc, x, y, lbl, img_fam, type, var)
 
 class CtrlButton(Ctrl):
-    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr):
-        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.btn)
+    def __init__(self, cvc, x, y, lbl: str, img_fam:ctrl_clr, var:any=None):
+        super().__init__(cvc, x, y, lbl, img_fam, ctrl_type.btn, var)

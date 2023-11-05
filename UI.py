@@ -5,6 +5,7 @@ from Shared import SharedCPU, SharedMachine, SharedMem
 from control_fncs import *
 from defs import *
 from rsc import RSC, GetRSC
+from tk_manager import GetTK
 from util import GetUtil, Util
 from tkinter import Button, Checkbutton, Radiobutton, Tk, Label, IntVar, BooleanVar, Canvas
 
@@ -105,8 +106,8 @@ class UI:
             if (i+3)%3 == 0: sk += 1
             ni -= 1
         
-        sw2 = CtrlSwitch(c, 2, CTRL_ROW, 'ON|OFF', clr)
-        sw2.set_command(partial(toggle_power, sw2))
+        sw2 = CtrlSwitch(c, 2, CTRL_ROW, 'ON|OFF', clr, var=self.s_cmp.power_on)
+        sw2.set_command(partial(toggle_power, sw2, self.s_cmp))
         self.inputs['POWER'] = sw2
 
         offset = 5
@@ -166,10 +167,10 @@ class UI:
         #HALT
         self.outputs['WAIT'] = CtrlLed(c, 2, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red)
         self.outputs['HLDA'] = CtrlLed(c, 3, ADDR_ROW_O, 'HLDA', ctrl_clr.led_red)
-        self.outputs['POWER'] = CtrlLed(c, 2, ADDR_ROW_I, 'POWER', ctrl_clr.led_grn)
+        self.outputs['POWER'] = CtrlLed(c, 2, ADDR_ROW_I, 'POWER', ctrl_clr.led_grn, var=self.s_cmp.power_on)
 
     def __init_ux(self):
-        self.root = tk.Tk()
+        self.root = GetTK()
         self.rsc = GetRSC()
         r = self.root
         r.title('Altair8800')
