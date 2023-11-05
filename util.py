@@ -10,8 +10,6 @@ class Util:
     rsc_uri     : str
     font_uri    : str
 
-    
-
     def set_trans(self, c:Canvas):
         hwnd = c.winfo_id()
         wnd_exstyle = windll.user32.GetWindowLongA(hwnd, -20)  # GWL_EXSTYLE

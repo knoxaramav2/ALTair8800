@@ -8,6 +8,7 @@ SPACERS     : list = [0,2,3,5,7,9,10]
 BOX_SZ      : int = 30
 FONT_SZ     : int = 8
 CHAR_PX     : float = 6.5
+IMG_SZ      : int = 32
 
 WIN_X       : int = 1200
 WIN_Y       : int = 550
