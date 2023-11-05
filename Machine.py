@@ -1,5 +1,6 @@
 
 
+from tkinter import Tk
 from CPU import CPU
 from Memory import Memory
 from Shared import SharedMachine
@@ -12,7 +13,17 @@ class Machine(SharedMachine):
     cpu     : CPU
     mem     : Memory
 
+    __tk    : Tk
     __util  : Util
+
+    def reset(self):
+        self.reset_buffers(self.__tk)
+        self.mem.reset()
+        self.cpu.reset()
+
+        print('RESET')
+        print(self.cpu.inst_ptr)
+        print(self.mem.get(0))
 
     def get_sw_addr(self):
         return self.__util.boolarr_to_int(self.addr_sw)
@@ -29,10 +40,9 @@ class Machine(SharedMachine):
         self.mem.set_curr_buffer(self.cpu.inst_ptr)
     
     def __init__(self):
-        self.tk = GetTK()
+        self.__tk = GetTK()
         self.__util = GetUtil()
-
-        super().__init__(self.tk)
+        super().__init__(self.__tk)
 
         self.mem = Memory()
         self.cpu = CPU(self.mem)

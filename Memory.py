@@ -9,6 +9,9 @@ class Memory(SharedMem):
 
     __util  : Util
 
+    def reset(self):
+        self.set_curr_data(0, 0)
+
     def set_curr_buffer(self, idx: int):
         self.__util.int_to_boolarr(self.data[idx], self.curr_data)
 

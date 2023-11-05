@@ -4,6 +4,7 @@ from tkinter import BooleanVar, IntVar, Tk
 
 from config import Config, GetConfig
 from tk_manager import GetTK
+from util import GetUtil, Util
 
 
 class SharedMem:
@@ -13,6 +14,7 @@ class SharedMem:
     #Interface
     def set_curr_buffer(self, idx:int): pass
     def set_curr_data(self, idx:int, data:int):pass
+    def reset(self): pass
 
     def get(self, idx:int) -> int:
         return self.data[idx]
@@ -29,7 +31,12 @@ class SharedCPU:
     mem_addr_reg    : int = 0
     mem_bffr_reg    : int = 0
 
+    __util          : Util
     __mem           : SharedMem
+
+    #Interface
+    def reset(self):pass
+
 
     def next_addr(self):
         self.inst_ptr += 1
@@ -42,6 +49,7 @@ class SharedCPU:
         self.__mem.set_curr_buffer(self.inst_ptr)
 
     def get_curr_data(self):
+        self.__util = GetUtil()
         return self.__mem.data[self.inst_ptr]
 
     def __init__(self, smem:SharedMem) -> None:
@@ -57,13 +65,20 @@ class SharedMachine:
     #Interface
     def get_sw_addr(self):pass
     def set_cpu_addr(self):pass
+    def reset(self):pass
+
+    def reset_buffers(self, tk):
+        for i in range(0, 16):
+            self.addr_buffer[i].set(False)
+        for i in range(0, 8):
+            self.data_buffer[i].set(False)
 
     def __init__(self, tk:Tk) -> None:
         self.power_on = BooleanVar(tk, value=False)
-
         for i in range(0, 16):
             self.addr_sw.append(BooleanVar(tk, False))
             self.addr_buffer.append(BooleanVar(tk, False))
         for i in range(0, 8):
             self.data_buffer.append(BooleanVar(tk, False))
+        
 

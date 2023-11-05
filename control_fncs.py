@@ -30,7 +30,7 @@ def deposit(host, ctrl:Ctrl):
 def reset(host, ctrl:Ctrl):
     print('Reset')
     if ctrl.state.get() == 1:#REST
-        pass
+        host.s_cmp.reset()
     else:#CLR
         pass
 

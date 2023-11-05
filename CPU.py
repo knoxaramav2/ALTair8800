@@ -16,9 +16,14 @@ class CPU(SharedCPU):
     clock   : Clock
     alu     : ALU
 
+    def reset(self):
+        self.inst_ptr = 0
+        
+        self.update_data_buffer()
+
     def __init__(self, mem:SharedMem) -> None:
         super().__init__(mem)
-        
+
         self.clock = Clock()
         self.alu = ALU()
 
