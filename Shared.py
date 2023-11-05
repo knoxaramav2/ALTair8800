@@ -10,7 +10,8 @@ from util import GetUtil, Util
 class SharedMem:
     data            : [int] = []
     curr_data       : [BooleanVar] = []
-    x : int
+    protect         : BooleanVar
+
     #Interface
     def set_curr_buffer(self, idx:int): pass
     def set_curr_data(self, idx:int, data:int):pass
@@ -22,6 +23,7 @@ class SharedMem:
     def __init__(self) -> None:
         cfg = GetConfig()
         tk = GetTK()
+        self.protect = BooleanVar(tk, False)
         self.data = np.zeros(cfg.__mem_size__)
         for i in range(0, 8):
             self.curr_data.append(BooleanVar(tk, False))
@@ -30,6 +32,14 @@ class SharedCPU:
     inst_ptr        : int = 0
     mem_addr_reg    : int = 0
     mem_bffr_reg    : int = 0
+
+    inte            : BooleanVar
+    hlta            : BooleanVar
+    wo              : BooleanVar
+    wait            : BooleanVar
+    m1              : BooleanVar
+    memr            : BooleanVar
+    int             : BooleanVar
 
     __util          : Util
     __mem           : SharedMem
@@ -54,7 +64,16 @@ class SharedCPU:
         return self.__mem.data[self.inst_ptr]
 
     def __init__(self, smem:SharedMem) -> None:
+        tk = GetTK()
+        
         self.__mem = smem
+        self.inte = BooleanVar(tk, False)
+        self.hlta = BooleanVar(tk, False)
+        self.wo = BooleanVar(tk, True)
+        self.wait = BooleanVar(tk, False)
+        self.m1 = BooleanVar(tk, True)
+        self.memr = BooleanVar(tk, True)
+        self.int = BooleanVar(tk, False)
         
 class SharedMachine:
     power_on        : BooleanVar

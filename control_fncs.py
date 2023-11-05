@@ -41,9 +41,9 @@ def reset(host, ctrl:Ctrl):
 def protect(host, ctrl:Ctrl):
     print('Protect')
     if ctrl.state.get() == 1:#PROTECT
-        pass
+        host.s_mem.protect.set(True)
     else:#UNPROTECT
-        pass
+        host.s_mem.protect.set(False)
 
 def toggle_ctrl(ctrl:CtrlSwitch, next_fnc=None):
     print('TOGGLE CTRL')

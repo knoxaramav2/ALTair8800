@@ -176,7 +176,22 @@ class UI:
         status = ['INTE', 'PROT', 'MEMR', 'INP', 'M1', 'OUT', 'HLTA', 'STACK', 'WO', 'INT']#Todo shared dictionary
         for i in range(len(status)):
             s = status[i]
-            self.outputs[s] = CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red)
+            v = None
+            match s:
+                case 'INTE': v = self.s_cpu.inte
+                case 'PROT': v = self.s_mem.protect
+                case 'MEMR': v = self.s_cpu.memr
+                case 'INP': v = None
+                case 'M1': v = self.s_cpu.m1
+                case 'OUT': v = None
+                case 'HLTA': v = self.s_cpu.hlta
+                case 'STACK': v = None
+                case 'WO':
+                    v = self.s_cpu.wo
+                case 'INT': v = self.s_cpu.int
+                case _: pass
+
+            self.outputs[s] = CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red, var=v)
 
         #HALT
         self.outputs['WAIT'] = CtrlLed(c, 2, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red)
