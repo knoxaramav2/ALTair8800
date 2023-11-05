@@ -86,9 +86,6 @@ class UI:
         for y in range(0, ROWS):
             self.__spacer(0, y)
 
-    def __testfnc(self):
-        print('TEST')
-
     def __init_inputs(self):
         c = self.cvc
         
@@ -100,7 +97,7 @@ class UI:
         for i in range(0, 16):
             if i == 8: clr = ctrl_clr.swt_white
             pos = i+offset+sk
-            sw2 = CtrlSwitch(c, pos, ADDR_ROW_I, str(ni), clr)
+            sw2 = CtrlSwitch(c, pos, ADDR_ROW_I, str(ni), clr, var=self.s_cmp.addr_sw[ni])
             sw2.set_command(partial(toggle_addr, sw2))
             self.inputs['ADDR_%s'%ni] = sw2
             if (i+3)%3 == 0: sk += 1
@@ -119,19 +116,35 @@ class UI:
         for i in range(0, len(ctrls)):
             pos = i + offset + sk
             txt = ctrls[i]
-            if i == 1:#SINGLE STEP
-                btn = CtrlButton(c, pos, CTRL_ROW, txt, ctrl_clr.btn_blue)
-                btn.set_command(partial(click_ctrl, btn))
-                self.inputs[txt] = btn
-            elif i == 6 or i == 7:#AUX
-                sw2 = CtrlSwitch(c, pos+2, CTRL_ROW, txt, ctrl_clr.swt_black)
-                sw2.set_command(partial(toggle_ctrl, sw2))
-                self.inputs[txt] = sw2
-            else:
-                sw3 = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False)
-                sw3.set_command(partial(toggle_ctrl, sw3))
-                self.inputs[txt] = sw3
+            inp = None
+            fnc = None
 
+            match i:
+                case 0:
+                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False, var=self.s_cmp.run)
+                    fnc = partial(toggle_ctrl, inp, partial(stop_run, self, inp))
+                case 1:
+                    inp = CtrlButton(c, pos, CTRL_ROW, txt, ctrl_clr.btn_blue)
+                    fnc = partial(click_ctrl, inp, partial(next_step, self, inp))
+                case 2:
+                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False)
+                    fnc = partial(toggle_ctrl, inp, partial(examine, self, inp))
+                case 3:
+                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False)
+                    fnc = partial(toggle_ctrl, inp, partial(deposit, self, inp))
+                case 4:
+                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False)
+                    fnc = partial(toggle_ctrl, inp, partial(reset, self, inp))
+                case 5:
+                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False)
+                    fnc = partial(toggle_ctrl, inp, partial(protect, self, inp))
+                case 6:
+                    inp = CtrlSwitch(c, pos+2, CTRL_ROW, txt, ctrl_clr.swt_black)
+                case 7:
+                    inp = CtrlSwitch(c, pos+2, CTRL_ROW, txt, ctrl_clr.swt_black)
+
+            inp.set_command(fnc)
+            self.inputs[txt] = inp
             sk += 1
 
     def __init_outputs(self):
@@ -143,7 +156,8 @@ class UI:
         ni = 15
         for i in range(0, 16):
             pos = i+offset+sk
-            self.outputs['ADDR_%s'%ni] = CtrlLed(c, pos, ADDR_ROW_O, 'A%s'%ni, ctrl_clr.led_red)
+            led = CtrlLed(c, pos, ADDR_ROW_O, 'A%s'%ni, ctrl_clr.led_red, var=self.s_cmp.addr_buffer[ni])
+            self.outputs['ADDR_%s'%ni] = led
             if (i+3)%3 == 0: sk += 1
             ni -= 1
 

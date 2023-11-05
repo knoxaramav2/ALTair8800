@@ -105,6 +105,7 @@ class Ctrl:
 
     def __init__(self, cvc, x, y, 
                  lbl:str, img_fam:ctrl_clr, type:ctrl_type, var:Variable=None):
+        self.state = IntVar(cvc.master, value=0)
         self.var = var
         self.grid = cvc
         self.type = type

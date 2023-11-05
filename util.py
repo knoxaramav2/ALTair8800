@@ -1,7 +1,7 @@
 
 from ctypes import windll
 import os
-from tkinter import Canvas
+from tkinter import BooleanVar, Canvas
 
 
 class Util:
@@ -10,6 +10,16 @@ class Util:
     rsc_uri     : str
     font_uri    : str
 
+    def int_to_boolarr(self, val:int, arr:[BooleanVar]) -> None:
+        for i in range(0, len(arr)):
+            arr[i].set(val & 1 << i)
+
+    def boolarr_to_int(self, arr:[BooleanVar]) -> int:
+        ret = 0b0
+        for i in range(len(arr)):
+            ret |= arr[i].get() << i
+        return ret
+    
     def set_trans(self, c:Canvas):
         hwnd = c.winfo_id()
         wnd_exstyle = windll.user32.GetWindowLongA(hwnd, -20)  # GWL_EXSTYLE
