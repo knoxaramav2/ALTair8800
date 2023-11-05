@@ -39,6 +39,12 @@ class Machine(SharedMachine):
         self.cpu.update_data_buffer()
         self.mem.set_curr_buffer(self.cpu.inst_ptr)
     
+    def update_addr_buffer(self):
+        self.__util.int_to_boolarr(self.cpu.inst_ptr, self.addr_buffer)
+
+    def update_addr_pos(self):
+        pass
+
     def __init__(self):
         self.__tk = GetTK()
         self.__util = GetUtil()

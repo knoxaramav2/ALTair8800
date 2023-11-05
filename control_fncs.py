@@ -11,13 +11,16 @@ def stop_run(host, ctrl:Ctrl):
 
 def next_step(host, ctrl:Ctrl):    
     host.s_cpu.next_addr()
+    host.s_cmp.update_addr_buffer()
     print('STEP ' + ctrl.upper_text + ' ' + str(host.s_cpu.inst_ptr))
 
 def examine(host, ctrl:Ctrl):
     print('Examine')
     if ctrl.state.get() == 0:#EXAMINE NEXT
         host.s_cpu.next_addr()
-    host.s_cmp.set_cpu_addr()
+        host.s_cmp.update_addr_buffer()
+    else:
+        host.s_cmp.set_cpu_addr()
     host.s_cpu.update_data_buffer()
     print("EXAM. %s at %s"%(host.s_cpu.get_curr_data(), host.s_cpu.inst_ptr))
 
@@ -25,11 +28,12 @@ def deposit(host, ctrl:Ctrl):
     print('Deposit')
     if ctrl.state.get() == 0:#DEPOSIT NEXT
         host.s_cpu.next_addr()
+        host.s_cmp.update_addr_buffer()
     host.s_cpu.set_word(host.s_cmp.get_sw_addr()&0xFF)
 
 def reset(host, ctrl:Ctrl):
     print('Reset')
-    if ctrl.state.get() == 1:#REST
+    if ctrl.state.get() == 1:#RESET
         host.s_cmp.reset()
     else:#CLR
         pass

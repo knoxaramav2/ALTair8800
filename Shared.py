@@ -40,6 +40,7 @@ class SharedCPU:
 
     def next_addr(self):
         self.inst_ptr += 1
+        print('ADDR = %s'%self.inst_ptr)
 
     def set_word(self, data):
         self.__mem.set_curr_data(self.inst_ptr, data)
@@ -65,6 +66,8 @@ class SharedMachine:
     #Interface
     def get_sw_addr(self):pass
     def set_cpu_addr(self):pass
+    def update_addr_buffer(self):pass
+    def update_addr_pos(self):pass
     def reset(self):pass
 
     def reset_buffers(self, tk):
