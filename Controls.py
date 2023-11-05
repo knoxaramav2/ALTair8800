@@ -1,9 +1,9 @@
 
 
 from enum import Enum
-from tkinter import BooleanVar, Button, Canvas, Checkbutton, Frame, IntVar, Label, PhotoImage, Radiobutton, Variable, Widget
+from tkinter import Button, Canvas, Checkbutton, IntVar, Label, PhotoImage, Variable, Widget
 
-from defs import BOX_SZ, CHROMA, IMG_SZ
+from defs import BOX_SZ, CHROMA
 from rsc import GetRSC
 
 #INPUTS

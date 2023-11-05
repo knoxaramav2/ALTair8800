@@ -1,6 +1,5 @@
 import numpy as np
-import tkinter as tk
-from tkinter import BooleanVar, IntVar, Tk
+from tkinter import BooleanVar, Tk
 
 from config import Config, GetConfig
 from tk_manager import GetTK

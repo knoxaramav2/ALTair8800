@@ -186,8 +186,7 @@ class UI:
                 case 'OUT': v = None
                 case 'HLTA': v = self.s_cpu.hlta
                 case 'STACK': v = None
-                case 'WO':
-                    v = self.s_cpu.wo
+                case 'WO': v = self.s_cpu.wo
                 case 'INT': v = self.s_cpu.int
                 case _: pass
 

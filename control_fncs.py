@@ -1,5 +1,6 @@
+
 from Controls import *
-from Shared import *
+from Shared import SharedMachine
 
 def stop_run(host, ctrl:Ctrl):
     if ctrl.state.get() == 1:#STOP
