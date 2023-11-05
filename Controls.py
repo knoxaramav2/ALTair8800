@@ -21,6 +21,7 @@ ctrl_clr = Enum(
         'swt_black',
         'swt_blue',
         'swt_red',
+        'swt_white',
 
         'led_grn',
         'led_red',
@@ -57,7 +58,10 @@ def get_imgs(img_fam:str):
             cols.append(rsc.input_photos['tgl_down_red'])
             cols.append(rsc.input_photos['tgl_mid_red'])
             cols.append(rsc.input_photos['tgl_up_red'])
-
+        case ctrl_clr.swt_white:
+            cols.append(rsc.input_photos['tgl_down_white'])
+            cols.append(rsc.input_photos['tgl_mid_white'])
+            cols.append(rsc.input_photos['tgl_up_white'])
         case ctrl_clr.led_grn:
             cols.append(rsc.output_photos['led_off_green'])
             cols.append(rsc.output_photos['led_on_green'])

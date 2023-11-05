@@ -30,26 +30,58 @@ class UI:
     rsc         : RSC
     util        : Util
 
+    inputs      : dict = {}
+    outputs     : dict = {}
+
     def run(self):
         self.root.update()
-        #TODO INIT LABELS
+        self.__init_labels()
+        self.util.set_trans(self.cvc)
+        self.root.update()
         self.root.mainloop()
 
-    def __spacer(self, col, row, clr):
+    def __create_label(self, ctrl:Ctrl, adj_y=0):
+        x = ctrl.base.winfo_x()
+        y = ctrl.base.winfo_y()
+        w = ctrl.imgs[0].width()#Used as referebce
+        ux = x+((w-(len(ctrl.upper_text)*CHAR_PX))/2)
+        uy = y+adj_y
+        lx = x+((w-(len(ctrl.lower_text)*CHAR_PX))/2)
+        ly = y+50+adj_y
+        
+        ctrl.upper_lbl = Label(self.cvc, text=ctrl.upper_text,
+            highlightthickness=0, bd=0, border=0,
+            wraplength=200,
+            bg=CHROMA, 
+            font=(self.rsc.lbl_font, FONT_SZ),
+            fg='white')
+        ctrl.upper_lbl.place(x=ux, y=uy)
+    
+        ctrl.lower_lbl = Label(self.cvc, text=ctrl.lower_text,
+            highlightthickness=0, bd=0, border=0,
+            wraplength=200,
+            bg=CHROMA,
+            font=(self.rsc.lbl_font, FONT_SZ),
+            fg='white')
+        ctrl.lower_lbl.place(x=lx, y=ly)
+
+    def __init_labels(self):
+        for k, v in self.outputs.items():
+            self.__create_label(v, -20)
+        for k, v in self.inputs.items():
+            self.__create_label(v, -20)
+
+    def __spacer(self, col, row):
         Label(self.cvc, bd=0, borderwidth=0,
-              #text='%s, %s'%(col, row), 
-              #image=clr,
               fg='white',
               width=4, height=2,
-              #width=BOX_SZ, height=BOX_SZ,
-              highlightthickness=1, bg=CHROMA).grid(row=row, column=col, padx=5, pady=5)
+              highlightthickness=0, bg=CHROMA).grid(row=row, column=col, padx=5, pady=5)
 
     def __init_grid_dim(self):
-        w = GetRSC().output_photos['led_off_white']
         for x in range(0,COLS):
-            self.__spacer(x, 0, w)
+            self.__spacer(x, 0)
         for y in range(0, ROWS):
-            self.__spacer(0, y, w)
+            self.__spacer(0, y)
 
     def __init_inputs(self):
         c = self.cvc
@@ -58,28 +90,31 @@ class UI:
         sk = 0
         clr = ctrl_clr.swt_red
         offset = 5
+        ni=15
         for i in range(0, 16):
-            if i == 8: clr = ctrl_clr.swt_black
+            if i == 8: clr = ctrl_clr.swt_white
             pos = i+offset+sk
-            CtrlSwitch(c, pos, ADDR_ROW_I, str(i), clr)
+            self.inputs['ADDR_%s'%ni] = CtrlSwitch(c, pos, ADDR_ROW_I, str(ni), clr)
             if (i+3)%3 == 0: sk += 1
+            ni -= 1
         
-        CtrlSwitch(c, 2, CTRL_ROW, 'POWER', clr)
+        self.inputs['POWER'] = CtrlSwitch(c, 2, CTRL_ROW, 'ON|OFF', clr)
 
         offset = 5
         sk = 0
         ctrls = ['STOP|RUN', 'S. STEP', 'EXAMINE|EXAMINE NEXT',
-                 'DEPOSIT|DEPOSIT NEXT', 'RESET|CLR', 'RESET|CLR', 
+                 'DEPOSIT|DEPOSIT NEXT', 'RESET|CLR', 
                  'PROTECT|UNPROTECT', 'AUX1', 'AUX2'
                  ]
         for i in range(0, len(ctrls)):
             pos = i + offset + sk
+            txt = ctrls[i]
             if i == 1:
-                CtrlButton(c, pos, CTRL_ROW, ctrls[i], ctrl_clr.btn_blue)
-            elif i == 7 or i == 8:
-                CtrlSwitch(c, pos, CTRL_ROW, ctrls[i], ctrl_clr.swt_blue)
+                self.inputs[txt] = CtrlButton(c, pos, CTRL_ROW, txt, ctrl_clr.btn_blue)
+            elif i == 6 or i == 7:
+                self.inputs[txt] = CtrlSwitch(c, pos+2, CTRL_ROW, txt, ctrl_clr.swt_black)
             else:
-                CtrlSwitch(c, pos, CTRL_ROW, ctrls[i], ctrl_clr.swt_blue, False)
+                self.inputs[txt] = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False)
             sk += 1
 
     def __init_outputs(self):
@@ -88,31 +123,34 @@ class UI:
         #ADDR
         sk = 0
         offset = 5
+        ni = 15
         for i in range(0, 16):
             pos = i+offset+sk
-            CtrlLed(c, pos, ADDR_ROW_O, 'A%s'%i, ctrl_clr.led_red)
+            self.outputs['ADDR_%s'%ni] = CtrlLed(c, pos, ADDR_ROW_O, 'A%s'%ni, ctrl_clr.led_red)
             if (i+3)%3 == 0: sk += 1
+            ni -= 1
 
         #DATA
         sk = 0
         offset = 16
+        ni = 7
         for i in range(0, 8):
             pos = i+offset+sk
-            CtrlLed(c, pos, STAT_ROW, 'A%s'%i, ctrl_clr.led_red)
+            self.outputs['DATA_%s'%ni] = CtrlLed(c, pos, STAT_ROW, 'D%s'%ni, ctrl_clr.led_red)
             if (i+3)%3 == 1: sk += 1
+            ni -= 1
 
         #STATUS
         offset = 2
-        status = ['INTE', 'PROT', 'MEMR', 'INP', 'M1', 'OUT' 'HLTA', 'STACK', 'WO', 'INT']#Todo shared dictionary
+        status = ['INTE', 'PROT', 'MEMR', 'INP', 'M1', 'OUT', 'HLTA', 'STACK', 'WO', 'INT']#Todo shared dictionary
         for i in range(len(status)):
             s = status[i]
-            CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red)
+            self.outputs[s] = CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red)
 
         #HALT
-        CtrlLed(c, 2, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red)
-        CtrlLed(c, 3, ADDR_ROW_O, 'SINGLE\nSTEP', ctrl_clr.led_red)
-
-        CtrlLed(c, 2, ADDR_ROW_I, 'POWER', ctrl_clr.led_grn)
+        self.outputs['WAIT'] = CtrlLed(c, 2, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red)
+        self.outputs['HLDA'] = CtrlLed(c, 3, ADDR_ROW_O, 'HLDA', ctrl_clr.led_red)
+        self.outputs['POWER'] = CtrlLed(c, 2, ADDR_ROW_I, 'POWER', ctrl_clr.led_grn)
 
     def __init_ux(self):
         self.root = tk.Tk()
@@ -150,7 +188,6 @@ class UI:
 
         #UI setup
         self.__init_ux()
-        self.util.set_trans(self.cvc)
 
     
         

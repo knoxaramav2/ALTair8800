@@ -50,11 +50,15 @@ class RSC:
         self.input_photos['tgl_up_blue'] = self.__load_img('tgl_up_blue_32.png')
         self.input_photos['tgl_mid_blue'] = self.__load_img('tgl_mid_blue_32.png')
         self.input_photos['tgl_down_blue'] = self.__load_img('tgl_down_blue_32.png')
+        self.input_photos['tgl_up_white'] = self.__load_img('tgl_up_white_32.png')
+        self.input_photos['tgl_mid_white'] = self.__load_img('tgl_mid_white_32.png')
+        self.input_photos['tgl_down_white'] = self.__load_img('tgl_down_white_32.png')
 
     def __load_fonts(self):
         pyglet.font.add_directory(self.__util.font_uri)
-        self._logo_font = 'Rawhide Raw 2012'
-        self._lbl_font = 'Basil Gothic NBP'
+        self.logo_font = 'Rawhide Raw 2012'
+        self.lbl_font = 'Basil Gothic NBP'
+
 
     def __init__(self):
         self.__util = GetUtil()
