@@ -2,11 +2,12 @@ from Controls import *
 from Shared import *
 
 def stop_run(host, ctrl:Ctrl):
-    print('Stop/Run')
     if ctrl.state.get() == 1:#STOP
-        ctrl.var.set(True)
+        ctrl.var = False
     else:#RUN
-        ctrl.var.set(False)
+        ctrl.var = True
+    if ctrl.var: print('RUN') 
+    else: print('STOP')
 
 def next_step(host, ctrl:Ctrl):    
     host.s_cpu.next_addr()
@@ -14,18 +15,17 @@ def next_step(host, ctrl:Ctrl):
 
 def examine(host, ctrl:Ctrl):
     print('Examine')
-    if ctrl.state.get() == 1:#EXAMINE
-        host.s_cmp.set_cpu_addr()
-        pass
-    else:#EXAMINE NEXT
-        pass
+    if ctrl.state.get() == 0:#EXAMINE NEXT
+        host.s_cpu.next_addr()
+    host.s_cmp.set_cpu_addr()
+    host.s_cpu.update_data_buffer()
+    print("EXAM. %s at %s"%(host.s_cpu.get_curr_data(), host.s_cpu.inst_ptr))
 
 def deposit(host, ctrl:Ctrl):
     print('Deposit')
-    if ctrl.state.get() == 1:#DEPOSIT
-        pass
-    else:#DEPOSIT NEXT
-        pass
+    if ctrl.state.get() == 0:#DEPOSIT NEXT
+        host.s_cpu.next_addr()
+    host.s_cpu.set_word(host.s_cmp.get_sw_addr()&0xFF)
 
 def reset(host, ctrl:Ctrl):
     print('Reset')

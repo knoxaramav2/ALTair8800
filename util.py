@@ -12,7 +12,8 @@ class Util:
 
     def int_to_boolarr(self, val:int, arr:[BooleanVar]) -> None:
         for i in range(0, len(arr)):
-            arr[i].set(val & 1 << i)
+            print('>> %s'%val)
+            arr[i].set((int(val) & 1 << i))
 
     def boolarr_to_int(self, arr:[BooleanVar]) -> int:
         ret = 0b0

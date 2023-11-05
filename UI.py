@@ -167,7 +167,7 @@ class UI:
         ni = 7
         for i in range(0, 8):
             pos = i+offset+sk
-            self.outputs['DATA_%s'%ni] = CtrlLed(c, pos, STAT_ROW, 'D%s'%ni, ctrl_clr.led_red)
+            self.outputs['DATA_%s'%ni] = CtrlLed(c, pos, STAT_ROW, 'D%s'%ni, ctrl_clr.led_red, self.s_mem.curr_data[ni])
             if (i+3)%3 == 1: sk += 1
             ni -= 1
 
