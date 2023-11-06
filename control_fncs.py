@@ -4,16 +4,17 @@ from Shared import SharedMachine
 
 def stop_run(host, ctrl:Ctrl):
     if ctrl.state.get() == 1:#STOP
-        ctrl.var = False
+        ctrl.var.set(True)
     else:#RUN
-        ctrl.var = True
+        ctrl.var.set(False)
     if ctrl.var: print('RUN') 
     else: print('STOP')
 
 def next_step(host, ctrl:Ctrl):    
+    host.s_cu.step()
     host.s_cpu.next_addr()
     host.s_cmp.update_addr_buffer()
-    print('STEP ' + ctrl.upper_text + ' ' + str(host.s_cpu.inst_ptr))
+    #print('STEP ' + ctrl.upper_text + ' ' + str(host.s_cpu.inst_ptr))
 
 def examine(host, ctrl:Ctrl):
     print('Examine')

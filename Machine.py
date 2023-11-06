@@ -4,6 +4,7 @@ from tkinter import Tk
 from CPU import CPU
 from Memory import Memory
 from Shared import SharedMachine
+from control_unit import ControlUnit
 from util import *
 from tk_manager import GetTK
 
@@ -12,6 +13,7 @@ class Machine(SharedMachine):
 
     cpu     : CPU
     mem     : Memory
+    cu      : ControlUnit
 
     __tk    : Tk
     __util  : Util
@@ -20,10 +22,8 @@ class Machine(SharedMachine):
         self.reset_buffers(self.__tk)
         self.mem.reset()
         self.cpu.reset()
-
         print('RESET')
-        print(self.cpu.inst_ptr)
-        print(self.mem.get(0))
+
 
     def get_sw_addr(self):
         return self.__util.boolarr_to_int(self.addr_sw)
@@ -52,6 +52,7 @@ class Machine(SharedMachine):
 
         self.mem = Memory()
         self.cpu = CPU(self.mem)
+        self.cu = ControlUnit()
         
 
         

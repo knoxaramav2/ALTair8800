@@ -1,7 +1,7 @@
 from functools import partial
 import tkinter as tk
 from Controls import *
-from Shared import SharedCPU, SharedMachine, SharedMem
+from Shared import SharedCPU, SharedCU, SharedMachine, SharedMem
 from control_fncs import *
 from defs import *
 from rsc import RSC, GetRSC
@@ -16,6 +16,7 @@ class UI:
     s_cpu       : SharedCPU
     s_mem       : SharedMem
     s_cmp       : SharedMachine
+    s_cu        : SharedCU
 
     util        : Util
     rsc         : RSC
@@ -121,7 +122,7 @@ class UI:
 
             match i:
                 case 0:
-                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False, var=self.s_cmp.run)
+                    inp = CtrlSwitch(c, pos, CTRL_ROW, txt, ctrl_clr.swt_blue, False, var=self.s_cu.wait)
                     fnc = partial(toggle_ctrl, inp, partial(stop_run, self, inp))
                 case 1:
                     inp = CtrlButton(c, pos, CTRL_ROW, txt, ctrl_clr.btn_blue)
@@ -182,7 +183,7 @@ class UI:
                 case 'PROT': v = self.s_mem.protect
                 case 'MEMR': v = self.s_cpu.memr
                 case 'INP': v = None
-                case 'M1': v = self.s_cpu.m1
+                case 'M1': v = self.s_cu.m1
                 case 'OUT': v = None
                 case 'HLTA': v = self.s_cpu.hlta
                 case 'STACK': v = None
@@ -193,8 +194,8 @@ class UI:
             self.outputs[s] = CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red, var=v)
 
         #HALT
-        self.outputs['WAIT'] = CtrlLed(c, 2, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red)
-        self.outputs['HLDA'] = CtrlLed(c, 3, ADDR_ROW_O, 'HLDA', ctrl_clr.led_red)
+        self.outputs['WAIT'] = CtrlLed(c, 2, ADDR_ROW_O, 'WAIT', ctrl_clr.led_red, var=self.s_cu.wait)
+        self.outputs['HLDA'] = CtrlLed(c, 3, ADDR_ROW_O, 'HLDA', ctrl_clr.led_red, var=self.s_cpu.hlta)
         self.outputs['POWER'] = CtrlLed(c, 2, ADDR_ROW_I, 'POWER', ctrl_clr.led_grn, var=self.s_cmp.power_on)
 
     def __init_ux(self):
@@ -223,13 +224,14 @@ class UI:
         self.__init_inputs()
         self.__init_outputs()
 
-    def __init__(self, scpu, smem, scmp):
+    def __init__(self, scmp):
         self.util = GetUtil()
 
         #Shared        
-        self.s_cpu = scpu
-        self.s_mem = smem
         self.s_cmp = scmp
+        self.s_cpu = scmp.cpu
+        self.s_mem = scmp.mem
+        self.s_cu = scmp.cu
 
         #UI setup
         self.__init_ux()

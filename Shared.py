@@ -27,6 +27,33 @@ class SharedMem:
         for i in range(0, 8):
             self.curr_data.append(BooleanVar(tk, False))
 
+class SharedCU:
+
+    mar         : int = 0
+    m1          : BooleanVar
+    wait        : BooleanVar
+
+    def get_MAR(self):
+        return self.mar
+
+    def set_MAR(self, addr: int):
+        self.mar = addr
+
+    def step(self):
+        pass
+
+    def start_cycle(self):
+        self.m1.set(True)
+
+    def reset(self):
+        self.wait.set(True)
+
+    def __init__(self) -> None:
+        tk = GetTK()
+
+        self.m1 = BooleanVar(tk, True)
+        self.wait = BooleanVar(tk, True)
+
 class SharedCPU:
     inst_ptr        : int = 0
     mem_addr_reg    : int = 0
@@ -36,7 +63,6 @@ class SharedCPU:
     hlta            : BooleanVar
     wo              : BooleanVar
     wait            : BooleanVar
-    m1              : BooleanVar
     memr            : BooleanVar
     int             : BooleanVar
 
