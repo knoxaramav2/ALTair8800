@@ -183,7 +183,7 @@ class UI:
                 case 'PROT': v = self.s_mem.protect
                 case 'MEMR': v = self.s_cpu.memr
                 case 'INP': v = None
-                case 'M1': v = self.s_cu.m1
+                case 'M1': v = self.s_cu.M1
                 case 'OUT': v = None
                 case 'HLTA': v = self.s_cpu.hlta
                 case 'STACK': v = None

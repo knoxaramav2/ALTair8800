@@ -5,6 +5,7 @@ from CPU import CPU
 from Memory import Memory
 from Shared import SharedMachine
 from control_unit import ControlUnit
+from decoder import Decoder
 from util import *
 from tk_manager import GetTK
 
@@ -14,6 +15,7 @@ class Machine(SharedMachine):
     cpu     : CPU
     mem     : Memory
     cu      : ControlUnit
+    dec     : Decoder
 
     __tk    : Tk
     __util  : Util
@@ -22,6 +24,7 @@ class Machine(SharedMachine):
         self.reset_buffers(self.__tk)
         self.mem.reset()
         self.cpu.reset()
+        self.cu.reset()
         print('RESET')
 
 
@@ -52,7 +55,8 @@ class Machine(SharedMachine):
 
         self.mem = Memory()
         self.cpu = CPU(self.mem)
-        self.cu = ControlUnit()
+        self.dec = Decoder()
+        self.cu = ControlUnit(self.cpu, self.dec)
         
 
         

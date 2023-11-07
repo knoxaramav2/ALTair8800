@@ -1,3 +1,4 @@
+from enum import Enum
 import numpy as np
 from tkinter import BooleanVar, Tk
 
@@ -27,32 +28,31 @@ class SharedMem:
         for i in range(0, 8):
             self.curr_data.append(BooleanVar(tk, False))
 
-class SharedCU:
+ALU_Reg = Enum (
+    'alu_reg',[
+        'A', 'F',
+        'B', 'C', 'BC',
+        'D', 'E', 'DE',
+        'H', 'L', 'HL'
+    ]
+)
 
-    mar         : int = 0
-    m1          : BooleanVar
-    wait        : BooleanVar
+class SharedALU:
+    acc             : int = 0
 
-    def get_MAR(self):
-        return self.mar
-
-    def set_MAR(self, addr: int):
-        self.mar = addr
-
-    def step(self):
-        pass
-
-    def start_cycle(self):
-        self.m1.set(True)
-
-    def reset(self):
-        self.wait.set(True)
+    def get_reg(reg:ALU_Reg): pass
+    def set_reg(reg:ALU_Reg, val:int): pass
+    def get_acc(self):pass
+    def set_acc(self, val:int):pass
+    def get_flag_sign(self):pass
+    def get_flag_zero(self):pass
+    def get_flag_aux(self):pass
+    def get_flag_parity(self):pass
+    def get_flag_carry(self):pass
+    def set_flags(self, sign:bool=None, zero:bool=None, aux:bool=None, parity:bool=None, carry:bool=None):pass
 
     def __init__(self) -> None:
-        tk = GetTK()
-
-        self.m1 = BooleanVar(tk, True)
-        self.wait = BooleanVar(tk, True)
+        pass
 
 class SharedCPU:
     inst_ptr        : int = 0
@@ -66,16 +66,18 @@ class SharedCPU:
     memr            : BooleanVar
     int             : BooleanVar
 
-    __util          : Util
     __mem           : SharedMem
 
     #Interface
     def reset(self):pass
 
 
-    def next_addr(self):
-        self.inst_ptr += 1
+    def next_addr(self, ln:int=1):
+        self.inst_ptr += ln
         print('ADDR = %s'%self.inst_ptr)
+
+    def jmp_addr(self, idx:int):
+        self.inst_ptr += idx
 
     def set_word(self, data):
         self.__mem.set_curr_data(self.inst_ptr, data)
@@ -84,9 +86,8 @@ class SharedCPU:
     def update_data_buffer(self) :
         self.__mem.set_curr_buffer(self.inst_ptr)
 
-    def get_curr_data(self):
-        self.__util = GetUtil()
-        return self.__mem.data[self.inst_ptr]
+    def read_mem(self, offset:int=0):
+        return self.__mem.data[self.inst_ptr+offset]
 
     def __init__(self, smem:SharedMem) -> None:
         tk = GetTK()
@@ -100,6 +101,26 @@ class SharedCPU:
         self.memr = BooleanVar(tk, True)
         self.int = BooleanVar(tk, False)
         
+class SharedCU:
+
+    M1          : BooleanVar
+    wait        : BooleanVar
+
+    #Interface
+    def step(self): pass
+    def set_MAR(self, addr: int): pass
+    def get_MAR(self): pass
+    def start_cycle(self): pass
+    def halt(self): pass
+    def start(self):pass
+    def reset(self): pass
+
+    def __init__(self) -> None:
+        tk = GetTK()
+
+        self.M1 = BooleanVar(tk, True)
+        self.wait = BooleanVar(tk, True)
+
 class SharedMachine:
     power_on        : BooleanVar
     run             : bool = False
