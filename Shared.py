@@ -40,6 +40,7 @@ ALU_Reg = Enum (
 class SharedALU:
     acc             : int = 0
 
+    def execute(inst:int):pass
     def get_reg(reg:ALU_Reg): pass
     def set_reg(reg:ALU_Reg, val:int): pass
     def get_acc(self):pass

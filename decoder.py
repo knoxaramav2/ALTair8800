@@ -1,4 +1,4 @@
-
+from inst_info import ADDR_MODE, ITYPE
 
 class Decoder:
     
@@ -35,12 +35,13 @@ class Decoder:
 
         return ln
 
-    def decode_inst(inst:int):
-        #cycles = 0
-        inst_len = 0
-        ind_addr = False
+    def decode_inst(inst:int) -> [ITYPE, ADDR_MODE]:
+        
+        addrm   : ADDR_MODE = None
+        type    : ITYPE = None
 
-        return inst_len, ind_addr
+        return type, addrm
+
 
     def __init__(self) -> None:
         pass
