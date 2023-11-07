@@ -54,9 +54,9 @@ class Machine(SharedMachine):
         super().__init__(self.__tk)
 
         self.mem = Memory()
-        self.cpu = CPU(self.mem)
         self.dec = Decoder()
-        self.cu = ControlUnit(self.cpu, self.dec)
+        self.cpu = CPU(self.mem, self.dec)
+        self.cu = ControlUnit(self.cpu, self.mem, self.dec)
         
 
         

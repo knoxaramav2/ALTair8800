@@ -69,8 +69,13 @@ class SharedCPU:
     __mem           : SharedMem
 
     #Interface
-    def reset(self):pass
-
+    def reset(self):
+        self.inte.set(False)
+        self.hlta.set(False)
+        self.wo.set(True)
+        self.wait.set(True)
+        self.memr.set(True)
+        self.int.set(True)
 
     def next_addr(self, ln:int=1):
         self.inst_ptr += ln
