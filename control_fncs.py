@@ -22,7 +22,7 @@ def examine(host, ctrl:Ctrl):
     else:
         host.s_cmp.set_cpu_addr()
     host.s_cpu.update_data_buffer()
-    print("EXAM. %s at %s"%(host.s_cpu.get_curr_data(), host.s_cpu.inst_ptr))
+    print("EXAM. %s at %s"%(host.s_cpu.read_mem(), host.s_cpu.inst_ptr))
 
 def deposit(host, ctrl:Ctrl):
     print('Deposit')

@@ -65,11 +65,11 @@ class ControlUnit(SharedCU):
           self.__icc = 0
           self.M1.set(True)
 
-     def __init__(self, scpu:SharedCPU, smem:SharedMem, sdec:Decoder, salu:SharedALU) -> None:
+     def __init__(self, scpu:SharedCPU, smem:SharedMem, sdec:Decoder) -> None:
           super().__init__()
 
           self.__cpu = scpu
-          self.__alu = salu
+          self.__alu = scpu.alu
           self.__mem = smem
           self.__dec = sdec
           self.__icc = 0
