@@ -2,7 +2,8 @@ from enum import Enum
 
 ADDR_MODE = Enum(
     'addr_mode',[
-        'IMM'
+        'IMM',
+        'DIRECT'
     ]
 )
 

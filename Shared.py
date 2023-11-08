@@ -30,27 +30,28 @@ class SharedMem:
 
 ALU_Reg = Enum (
     'alu_reg',[
-        'A', 'F',
-        'B', 'C', 'BC',
-        'D', 'E', 'DE',
-        'H', 'L', 'HL'
+        #3 bit
+        'B', 'C',
+        'D', 'E',
+        'H', 'L'
+        'M', 'A',
+        #2 bit
+        'BC', 'DE', 'HL', 'MA'
+    ]
+)
+
+ALU_Flag = Enum (
+    'alu_flag',[
+        'C', 'P', 'A', 'Z', 'S' 
     ]
 )
 
 class SharedALU:
-    acc             : int = 0
-
-    def execute(inst:int):pass
-    def get_reg(reg:ALU_Reg): pass
-    def set_reg(reg:ALU_Reg, val:int): pass
-    def get_acc(self):pass
-    def set_acc(self, val:int):pass
-    def get_flag_sign(self):pass
-    def get_flag_zero(self):pass
-    def get_flag_aux(self):pass
-    def get_flag_parity(self):pass
-    def get_flag_carry(self):pass
-    def set_flags(self, sign:bool=None, zero:bool=None, aux:bool=None, parity:bool=None, carry:bool=None):pass
+    def execute(self, inst:int):pass
+    def read_reg(self, reg:ALU_Reg):pass
+    def set_reg(self, reg:ALU_Reg, val:int):pass
+    def read_flag(self, flag:ALU_Flag):pass
+    def set_flag(self, flag:ALU_Flag, val:int):pass
 
     def __init__(self) -> None:
         pass
@@ -92,8 +93,9 @@ class SharedCPU:
     def update_data_buffer(self) :
         self.__mem.set_curr_buffer(self.inst_ptr)
 
-    def read_mem(self, offset:int=0):
-        return self.__mem.data[self.inst_ptr+offset]
+    def read_mem(self, offset:int=0, abs:bool=False):
+        pos = self.inst_ptr+offset if abs else offset
+        return self.__mem.data[pos]
 
     def __init__(self, smem:SharedMem) -> None:
         tk = GetTK()

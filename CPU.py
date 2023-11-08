@@ -1,6 +1,5 @@
 
 
-from enum import Enum
 from Shared import ALU_Reg, SharedALU, SharedCPU, SharedCU, SharedMem
 from alu import ALU
 from decoder import Decoder

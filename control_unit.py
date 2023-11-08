@@ -1,6 +1,6 @@
 
 
-from Shared import ALU_Reg, SharedALU, SharedCPU, SharedCU, SharedMem
+from Shared import SharedALU, SharedCPU, SharedCU, SharedMem
 from decoder import Decoder
 
 
@@ -23,10 +23,6 @@ class ControlUnit(SharedCU):
      def __mov_mar_mbr(self):
                self.__mbr = self.__mem.get(self.__mar)
                self.__inst_len = self.__dec.inst_len(self.__mbr)
-               if self.__inst_len >= 2:
-                    self.__alu.set_reg(ALU_Reg.L, self.__mem.get(self.__mar+1))
-               if self.__inst_len == 3:
-                    self.__alu.set_reg(ALU_Reg.H, self.__mem.get(self.__mar+2))
           
      def __set_ir(self):
           self.__ir = self.__mbr          
