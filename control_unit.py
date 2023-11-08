@@ -10,22 +10,18 @@ class ControlUnit(SharedCU):
      __alu           : SharedALU
      __mem           : SharedMem
      __dec           : Decoder
-     __icc           : int
-     __mar           : int = 0
-     __mbr           : int = 0
-     __ir            : int = 0
 
      __inst_len      : int = 1
 
      def __mov_pc_mar(self):
-          self.__mar = self.__cpu.inst_ptr
+          self.__cpu.mar = self.__cpu.inst_ptr
 
      def __mov_mar_mbr(self):
-               self.__mbr = self.__mem.get(self.__mar)
-               self.__inst_len = self.__dec.inst_len(self.__mbr)
+          self.__cpu.mbr = self.__mem.get(self.__cpu.mar)
+          self.__inst_len = self.__dec.inst_len(self.__cpu.mbr)
           
      def __set_ir(self):
-          self.__ir = self.__mbr          
+          self.__cpu.ir = self.__cpu.mbr          
           self.__cpu.next_addr(self.__inst_len)
 
      def step(self):
@@ -35,16 +31,16 @@ class ControlUnit(SharedCU):
           self.__set_ir()
 
           #Execute
-          self.__alu.execute(self.__ir)
+          self.__alu.execute(self.__cpu.ir)
 
           #Interrupt
 
 
      def set_MAR(self, addr: int):
-          self.__mar = addr
+          self.__cpu.mar = addr
      
      def get_MAR(self):
-          return self.__mar
+          return self.__cpu.mar
      
      def start_cycle(self):
           self.M1.set(True)
@@ -68,4 +64,3 @@ class ControlUnit(SharedCU):
           self.__alu = scpu.alu
           self.__mem = smem
           self.__dec = sdec
-          self.__icc = 0

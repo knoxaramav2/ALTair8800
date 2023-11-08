@@ -14,7 +14,7 @@ class SharedMem:
 
     #Interface
     def set_curr_buffer(self, idx:int): pass
-    def set_curr_data(self, idx:int, data:int):pass
+    def set_mem(self, idx:int, data:int):pass
     def reset(self): pass
 
     def get(self, idx:int) -> int:
@@ -57,16 +57,20 @@ class SharedALU:
         pass
 
 class SharedCPU:
-    inst_ptr        : int = 0
-    mem_addr_reg    : int = 0
-    mem_bffr_reg    : int = 0
+    inst_ptr        : intt = 0
+    mem_addr_reg    : intt = 0
+    mem_bffr_reg    : intt = 0
 
     inte            : BooleanVar
     hlta            : BooleanVar
     wo              : BooleanVar
     wait            : BooleanVar
     memr            : BooleanVar
-    int             : BooleanVar
+    intt            : BooleanVar
+
+    mar             : int = 0
+    mbr             : int = 0
+    ir              : int = 0
 
     __mem           : SharedMem
 
@@ -77,23 +81,24 @@ class SharedCPU:
         self.wo.set(True)
         self.wait.set(True)
         self.memr.set(True)
-        self.int.set(True)
+        self.intt.set(True)
 
-    def next_addr(self, ln:int=1):
+    def next_addr(self, ln:intt=1):
         self.inst_ptr += ln
         print('ADDR = %s'%self.inst_ptr)
 
-    def jmp_addr(self, idx:int):
+    def jmp_addr(self, idx:intt):
         self.inst_ptr += idx
 
-    def set_word(self, data):
-        self.__mem.set_curr_data(self.inst_ptr, data)
+    def set_word(self, data, addr=None):
+        if addr == None: addr = self.inst_ptr
+        self.__mem.set_mem(addr, data)
         print('SET %s at %s'%(self.__mem.get(self.inst_ptr), self.inst_ptr))
 
     def update_data_buffer(self) :
         self.__mem.set_curr_buffer(self.inst_ptr)
 
-    def read_mem(self, offset:int=0, abs:bool=False):
+    def read_mem(self, offset:intt=0, abs:bool=False):
         pos = self.inst_ptr+offset if abs else offset
         return self.__mem.data[pos]
 
@@ -107,7 +112,7 @@ class SharedCPU:
         self.wait = BooleanVar(tk, False)
         self.m1 = BooleanVar(tk, True)
         self.memr = BooleanVar(tk, True)
-        self.int = BooleanVar(tk, False)
+        self.intt = BooleanVar(tk, False)
         
 class SharedCU:
 

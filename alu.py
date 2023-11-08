@@ -1,10 +1,11 @@
-from Shared import ALU_Flag, ALU_Reg, SharedALU, SharedCPU
+from Shared import ALU_Flag, ALU_Reg, SharedALU, SharedCPU, SharedCU
 from decoder import Decoder
 from inst_info import ADDR_MODE, ITYPE
 
 class ALU(SharedALU):
 
     __scpu      : SharedCPU
+    __cu        : SharedCU
     __dec       : Decoder
     __reg_MA    : [] = [0, 0]#Flags: SZAPC
     __reg_BC    : [] = [0, 0]
@@ -41,6 +42,12 @@ class ALU(SharedALU):
     
     def set_flag(self, flag: ALU_Reg, val:int):
         self.__flags[flag.value] = val
+
+    def read_direct(self, addr:int, num:int):
+        addr = self.__scpu.cu
+        lb = self.__scpu.read_mem(1)
+        hb = self.__scpu.read_mem(2)
+        addr = (hb<<0x8)|lb
 
     #TODO worth keeping for sake of consistency?
     def is_parity(self, val:int, bytes:int): 
@@ -93,26 +100,28 @@ class ALU(SharedALU):
         src_c = inst & 0x7
         src_val = self.read_reg(ALU_Reg(src_c))
         acc_val = self.read_reg(ALU_Reg.A)
-        self.set_reg(ALU_Reg.A, acc_val - src_val)
+        res = acc_val = acc_val + src_val
+        self.set_math_flags(res, acc_val, 2)
 
     #DIRECT ADDR
-    def __LDAX(self, inst:int, mode:ADDR_MODE):
+    def __LDA(self, inst:int, mode:ADDR_MODE):
         addr = 0
         if mode == ADDR_MODE.DIRECT:
-            lb = self.__scpu.read_mem(1)
-            hb = self.__scpu.read_mem(2)
-            addr = (hb<<0x8)|lb
-        
-        self.__reg_MA[0] = addr
-    
-    def __STAX(self, inst:int, mode:ADDR_MODE):
-        pass
+            addr = self.read_direct(self.__scpu.mar, 2)
+        self.set_reg(ALU_Reg.A, addr)
+
+    def __STA(self, inst:int, mode:ADDR_MODE):
+        addr = 0
+        acc = self.read_reg(ALU_Reg.A)
+        if mode == ADDR_MODE.DIRECT:
+            addr = self.read_direct(self.__scpu.mar, 2)
+        self.__scpu.set_word(acc, addr)
 
     #IMM
 
     #JUMP
     def __JMP(self, inst):
-        pass
+        self.__scpu.inst_ptr = self.__scpu.mar
 
     #CALL
 
@@ -124,8 +133,8 @@ class ALU(SharedALU):
         f'EXEC: {inst:#08b} : {itype.name:<6}   {addrm.name}'
 
         match itype:
-            case ITYPE.LDAX: self.__LDAX(inst, addrm)
-            case ITYPE.STAX: self.__STAX(inst, addrm)
+            case ITYPE.LDAX: self.__LDA(inst, addrm)
+            case ITYPE.STAX: self.__STA(inst, addrm)
             
             case ITYPE.ADD: self.__ADD(inst)
 
@@ -140,3 +149,4 @@ class ALU(SharedALU):
         super().__init__()
         self.__dec = dec
         self.__scpu = scpu
+

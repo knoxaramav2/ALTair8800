@@ -1,6 +1,6 @@
 
 
-from Shared import ALU_Reg, SharedALU, SharedCPU, SharedCU, SharedMem
+from Shared import SharedALU, SharedCPU, SharedMem
 from alu import ALU
 from decoder import Decoder
 

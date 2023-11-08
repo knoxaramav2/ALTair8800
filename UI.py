@@ -188,7 +188,7 @@ class UI:
                 case 'HLTA': v = self.s_cpu.hlta
                 case 'STACK': v = None
                 case 'WO': v = self.s_cpu.wo
-                case 'INT': v = self.s_cpu.int
+                case 'INT': v = self.s_cpu.intt
                 case _: pass
 
             self.outputs[s] = CtrlLed(c, i+offset, STAT_ROW, s, ctrl_clr.led_red, var=v)
