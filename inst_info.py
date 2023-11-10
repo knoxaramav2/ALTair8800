@@ -2,20 +2,30 @@ from enum import Enum
 
 ADDR_MODE = Enum(
     'addr_mode',[
-        'IMM',
+        'IMPLIED',
+        'REGISTER',
+        'IMMEDIATE',
         'DIRECT'
     ]
 )
 
 ITYPE = Enum(
     'itype',[
-        'LDAX',
-        'STAX',
-
+        'NOP',
+        'LDA', 'LXI',
+        'INX', 'DCX',
+        'STA',
+        'SHLD', 'LHLD',
+        'ROT',
+        'CARRY', 'ACCU',
         'MOV',
-
-        'ADD',
-
-        'JMP'
+        'HALT',
+        'ADD', 'DAD',
+        'SUB',
+        'AND', 'OR', 'XOR', 'CMP',
+        'RETURN',
+        'POP', 'PUSH',
+        'JMP', 'CALL',
+        'OUT', 'IN', 'XTHL', 'DI'
     ]
 )

@@ -19,7 +19,7 @@ class Memory(SharedMem):
     def set_mem(self, idx:int, data:int):
         if self.protect.get(): return
         self.data[idx] = data
-        self.set_curr_buffer(idx)
+        #self.set_curr_buffer(idx)
 
     def __init__(self):
         self.__util = GetUtil()

@@ -57,10 +57,14 @@ class ControlUnit(SharedCU):
           self.__icc = 0
           self.M1.set(True)
 
+     def read_mem(self, idx):
+          return self.__mem.get(idx)
+
      def __init__(self, scpu:SharedCPU, smem:SharedMem, sdec:Decoder) -> None:
           super().__init__()
 
           self.__cpu = scpu
           self.__alu = scpu.alu
+          self.__alu.set_cu(self)
           self.__mem = smem
           self.__dec = sdec

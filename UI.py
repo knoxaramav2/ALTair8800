@@ -224,14 +224,14 @@ class UI:
         self.__init_inputs()
         self.__init_outputs()
 
-    def __init__(self, scmp):
+    def __init__(self, scmp:SharedMachine):
         self.util = GetUtil()
 
         #Shared        
         self.s_cmp = scmp
-        self.s_cpu = scmp.cpu
-        self.s_mem = scmp.mem
-        self.s_cu = scmp.cu
+        self.s_cpu = scmp.get_cpu()
+        self.s_mem = scmp.get_mem()
+        self.s_cu = scmp.get_cu()
 
         #UI setup
         self.__init_ux()

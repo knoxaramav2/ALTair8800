@@ -24,7 +24,7 @@ class SharedMem:
         cfg = GetConfig()
         tk = GetTK()
         self.protect = BooleanVar(tk, False)
-        self.data = np.zeros(cfg.__mem_size__)
+        self.data = [0] * cfg.__mem_size__
         for i in range(0, 8):
             self.curr_data.append(BooleanVar(tk, False))
 
@@ -33,7 +33,7 @@ ALU_Reg = Enum (
         #3 bit
         'B', 'C',
         'D', 'E',
-        'H', 'L'
+        'H', 'L',
         'M', 'A',
         #2 bit
         'BC', 'DE', 'HL', 'MA'
@@ -53,13 +53,15 @@ class SharedALU:
     def read_flag(self, flag:ALU_Flag):pass
     def set_flag(self, flag:ALU_Flag, val:int):pass
 
+    def set_cu(self, cu):pass#TODO Less hacky solution
+
     def __init__(self) -> None:
         pass
 
 class SharedCPU:
-    inst_ptr        : intt = 0
-    mem_addr_reg    : intt = 0
-    mem_bffr_reg    : intt = 0
+    inst_ptr        : int = 0
+    mem_addr_reg    : int = 0
+    mem_bffr_reg    : int = 0
 
     inte            : BooleanVar
     hlta            : BooleanVar
@@ -72,40 +74,18 @@ class SharedCPU:
     mbr             : int = 0
     ir              : int = 0
 
-    __mem           : SharedMem
-
     #Interface
-    def reset(self):
-        self.inte.set(False)
-        self.hlta.set(False)
-        self.wo.set(True)
-        self.wait.set(True)
-        self.memr.set(True)
-        self.intt.set(True)
+    def reset(self): pass
+    def next_addr(self, ln:int=1): pass
+    def set_addr(self, addr): pass
+    def jmp_addr(self, idx:int): pass
+    def read_direct(self, offset:int): pass
+    def set_word(self, data, addr=None): pass
+    def update_data_buffer(self) :  pass
 
-    def next_addr(self, ln:intt=1):
-        self.inst_ptr += ln
-        print('ADDR = %s'%self.inst_ptr)
-
-    def jmp_addr(self, idx:intt):
-        self.inst_ptr += idx
-
-    def set_word(self, data, addr=None):
-        if addr == None: addr = self.inst_ptr
-        self.__mem.set_mem(addr, data)
-        print('SET %s at %s'%(self.__mem.get(self.inst_ptr), self.inst_ptr))
-
-    def update_data_buffer(self) :
-        self.__mem.set_curr_buffer(self.inst_ptr)
-
-    def read_mem(self, offset:intt=0, abs:bool=False):
-        pos = self.inst_ptr+offset if abs else offset
-        return self.__mem.data[pos]
-
-    def __init__(self, smem:SharedMem) -> None:
+    def __init__(self) -> None:
         tk = GetTK()
         
-        self.__mem = smem
         self.inte = BooleanVar(tk, False)
         self.hlta = BooleanVar(tk, False)
         self.wo = BooleanVar(tk, True)
@@ -127,6 +107,7 @@ class SharedCU:
     def halt(self): pass
     def start(self):pass
     def reset(self): pass
+    def read_mem(self, idx): pass
 
     def __init__(self) -> None:
         tk = GetTK()
@@ -147,6 +128,12 @@ class SharedMachine:
     def update_addr_buffer(self):pass
     def update_addr_pos(self):pass
     def reset(self):pass
+    def reset_addr_sw(self):pass
+    def update_display(self):pass
+
+    def get_cpu(self) -> SharedCPU: pass
+    def get_mem(self) -> SharedMem: pass
+    def get_cu(self) -> SharedCU: pass
 
     def reset_buffers(self, tk):
         for i in range(0, 16):

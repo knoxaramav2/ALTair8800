@@ -7,6 +7,10 @@ from util import GetUtil
 
 
 def load_program(cmp:SharedMachine):
+
+    cpu = cmp.get_cpu()
+    mem = cmp.get_mem()
+
     file = GetConfig().program_file()
     util = GetUtil()
     base_uri = util.base_uri+'\\devbin'
@@ -19,7 +23,10 @@ def load_program(cmp:SharedMachine):
     
     cmp.reset()
 
-    base = 0
+    base     = 0
+    offset   = 0
+    offset_i = 0
+
     f = open(file, 'r')
     lns = f.readlines()
 
@@ -30,21 +37,38 @@ def load_program(cmp:SharedMachine):
         lns.pop(0)
 
     parr = []
+    i = 0
     for ln in lns:
+        i += 1
         ln = ln.strip()
         if str.isspace(ln) or ln=='': continue
         cidx = ln.find('#')
         if cidx != -1: ln = ln[0:cidx]
+        if not ln.replace(' ', '').isnumeric():
+            if not ln.startswith('.'):
+                print(f'Invalid ASM: {i}: {ln}')
+                continue
+            else:
+                parr.append(ln)
+                continue
         parr.extend(ln.split())
 
     for nstr in parr:
+        if not nstr.isnumeric():
+            k, v = nstr.split(' ')
+            match k:
+                case '.offset': cpu.set_addr(int(v, base))
+                case _: print('Unknown label ' + nstr)
+            continue
+        
         num = int(nstr, base)
 
         for i in range(0, 8):
             sw = num & (1 << i)
-            cmp.addr_sw[i].set(sw)
-        cmp.cpu.set_word(cmp.get_sw_addr()&0xFF)
-        cmp.cpu.next_addr()
+            cmp.data_buffer[i].set(sw)
+        cpu.set_word(util.boolarr_to_int(cmp.data_buffer)&0xFF)
+        cpu.next_addr()
+    
     cmp.reset()
 
     print(f'LOADED {file}:')

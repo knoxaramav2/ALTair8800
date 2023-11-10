@@ -65,7 +65,6 @@ def toggle_ctrl(ctrl:CtrlSwitch, next_fnc=None):
         next_fnc()
 
 def click_ctrl(ctrl:CtrlButton, next_fnc=None):
-    print('CLICK CTRL')
     ctrl.base.configure(image=ctrl.imgs[0])
     ctrl.base.after(100, lambda:ctrl.base.configure(image=ctrl.imgs[1]))
 

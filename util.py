@@ -11,14 +11,15 @@ class Util:
     font_uri    : str
 
     def int_to_boolarr(self, val:int, arr:[BooleanVar]) -> None:
+        val = int(val)
         for i in range(0, len(arr)):
-            arr[i].set((int(val) & 1 << i))
+            arr[i].set((val & 1 << i))
 
     def boolarr_to_int(self, arr:[BooleanVar]) -> int:
-        ret = 0b0
+        ret = 0
         for i in range(len(arr)):
             ret |= arr[i].get() << i
-        return ret
+        return int(ret)
     
     def set_trans(self, c:Canvas):
         hwnd = c.winfo_id()
