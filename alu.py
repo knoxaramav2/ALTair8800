@@ -127,8 +127,7 @@ class ALU(SharedALU):
 
     #JUMP
     def __JMP(self, inst, mode:ADDR_MODE, mod:int):
-        print(f'{inst:#02x} : {mod:#02x}')
-        
+
         jmp = False
 
         match inst:
@@ -148,6 +147,23 @@ class ALU(SharedALU):
         self.__scpu.jmp_addr(addr)
 
     #CALL
+    def __CALL(self, inst, mode:ADDR_MODE, mod:int):
+        print(f'{inst:#02x} : {mod:#02x}')
+        
+        call = False
+
+        match inst:
+            case 0xCD: call = True #CALL
+            case 0xF4: call = self.read_flag(ALU_Flag.S) == 0 #CP
+            case 0xFC: call = self.read_flag(ALU_Flag.S) == 1 #CM
+            case 0xCC: call = self.read_flag(ALU_Flag.Z) == 1 #CZ
+            case 0xC4: call = self.read_flag(ALU_Flag.Z) == 0 #CNZ
+            case 0xDC: call = self.read_flag(ALU_Flag.C) == 1 #CC
+            case 0xD4: call = self.read_flag(ALU_Flag.C) == 0 #CNC
+            case 0xEC: call = self.read_flag(ALU_Flag.P) == 1 #CPE
+            case 0xE4: call = self.read_flag(ALU_Flag.P) == 0 #CPO
+
+        if not call: return
 
     #RETURN
 
