@@ -14,6 +14,13 @@ class ALU(SharedALU):
     __reg_HL    : [] = [0, 0]
     __flags     : [] = [False, False, False, False, False]
     
+    def reg_pair(self, code):
+        match code:
+            case 0x0: return ALU_Reg.BC
+            case 0x1: return ALU_Reg.DE
+            case 0x2: return ALU_Reg.HL
+            case 0x3: return ALU_Reg.MA
+
     def read_reg(self, reg: ALU_Reg):
         match reg:
             case ALU_Reg.M: return self.__reg_MA[0]
@@ -80,9 +87,9 @@ class ALU(SharedALU):
         self.set_flag(ALU_Flag.P, self.is_parity(res, bytes))
         self.set_flag(ALU_Flag.C, (lval >> 0x10) and not sub)
 
-    #IO
 
-    #ROTATE
+
+    #IO
 
     #DATA TRANSFER
     def __MOV(self, inst, mode:ADDR_MODE):
@@ -100,8 +107,23 @@ class ALU(SharedALU):
         
         self.set_reg(ALU_Reg(dst_c), src_val)
 
+    #REGISTER MODIFY
+    def __INR(self, inst, mod:int):
+        if mod == 1:  reg = self.reg_pair((inst>>4) & 0x3)
+        else: reg = ALU_Reg((inst>>3)&0x7)
+
+        val = self.read_reg(reg)
+        self.set_reg(reg, val+1)
+
+    def __DCR(self, inst, mod:int):
+        if mod == 1:  reg = self.reg_pair((inst>>4) & 0x3)
+        else: reg = ALU_Reg((inst>>3)&0x7)
+
+        val = self.read_reg(reg)
+        self.set_reg(reg, val-1)
+
     #REG/MEM TRANSFER
-    def __ADD(self, inst, mode:ADDR_MODE):
+    def __ADD(self, inst:int, mode:ADDR_MODE):
         src_c = (inst & 0x7) + 1
         src_val = self.read_reg(ALU_Reg(src_c))
         acc_val = self.read_reg(ALU_Reg.A)
@@ -109,7 +131,7 @@ class ALU(SharedALU):
         self.set_reg(ALU_Reg.A, res)
         self.set_math_flags(res, acc_val, 2)
 
-    def __SUB(self, inst, mode:ADDR_MODE):
+    def __SUB(self, inst:int, mode:ADDR_MODE):
         src_c = (inst & 0x7) + 1
         src_val = self.read_reg(ALU_Reg(src_c))
         acc_val = self.read_reg(ALU_Reg.A)
@@ -137,6 +159,26 @@ class ALU(SharedALU):
         else:
             reg = ALU_Reg.BC if mod == 0 else ALU_Reg.DE
             self.set_reg(reg, acc)
+
+    def __ROT(self, inst:int, mod:int):
+        acc = self.read_reg(ALU_Reg.A)
+        c = self.read_flag(ALU_Flag.C)
+        b7 = acc&0x80
+        b0 = acc&0x01
+        if mod == 0: #RLC
+            acc = (acc << 1) | b7 >> 7
+            c = b7
+        elif mod == 2: #RRC
+            acc = (acc >> 1) | b0 << 7
+            c = b0
+        elif mod == 3: #RAL
+            acc = (acc << 1) | c
+            c = b7
+        elif mod == 4: #RAR
+            acc = (acc >> 1) | c << 7
+            c = b0
+            
+        self.set_flag(ALU_Flag.C, b7)
 
     #CTRL
     def __HALT(self, inst):
@@ -218,6 +260,8 @@ class ALU(SharedALU):
         addr = self.__scpu.pop_stack()
         self.__scpu.jmp_addr(addr)
 
+
+
     def execute(self, inst:int):
         itype, addrm, mod = self.__dec.decode_inst(inst)
         
@@ -226,11 +270,15 @@ class ALU(SharedALU):
         match itype:
             case ITYPE.LDA: self.__LDA(inst, addrm, mod)
             case ITYPE.STA: self.__STA(inst, addrm, mod)
+            case ITYPE.ROT: self.__ROT(inst, mod)
             
             case ITYPE.ADD: self.__ADD(inst, addrm)
             case ITYPE.SUB: self.__SUB(inst, addrm)
 
             case ITYPE.MOV: self.__MOV(inst, addrm)
+
+            case ITYPE.INX: self.__INR(inst, mod)
+            case ITYPE.DCX: self.__DCR(inst, mod)
 
             case ITYPE.HALT: self.__HALT(inst)
 
