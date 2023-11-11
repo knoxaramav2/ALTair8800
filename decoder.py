@@ -99,6 +99,7 @@ class Decoder:
                 elif (hb == 0xF): itype = ITYPE.DI
                 else:
                     itype = ITYPE.JMP
+                    addrm = ADDR_MODE.IMMEDIATE
                     mod = hb
 
         return itype, addrm, mod

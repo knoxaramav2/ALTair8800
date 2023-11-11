@@ -145,6 +145,7 @@ class ALU(SharedALU):
             case ITYPE.STA: self.__STA(inst, addrm)
             
             case ITYPE.ADD: self.__ADD(inst, addrm)
+            case ITYPE.SUB: self.__SUB(inst, addrm)
 
             case ITYPE.MOV: self.__MOV(inst, addrm)
 

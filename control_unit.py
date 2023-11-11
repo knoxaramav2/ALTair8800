@@ -50,6 +50,7 @@ class ControlUnit(SharedCU):
 
      def start(self):
           self.wait.set(False)
+          self.__cpu.start_clock(lambda:self.step())
 
      def reset(self):
           self.halt()

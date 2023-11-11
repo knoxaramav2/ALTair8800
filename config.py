@@ -3,6 +3,9 @@ import sys
 from defs import *
 
 class Config:
+
+    __clock_rate__  = 2000000
+
     __mem_size__    = MAX16
     __stack_size__  = MAX8
 
@@ -14,6 +17,7 @@ class Config:
     def stack_size(self): return self.__stack_size__
     def debug_mode(self): return self.__dbg_mode__
     def program_file(self): return self.__prg_file__
+    def clock_rate(self): return self.__clock_rate__
 
     def __parse_cmd(self, arg:str):
         terms = arg.split('=')
@@ -32,6 +36,8 @@ class Config:
             case '--stacksize': self.__stack_size__=int(v)
 
             case '--program': self.__prg_file__ = v
+
+            case '--clockrate': self.__clock_rate__ = v
 
             case _: pass
 

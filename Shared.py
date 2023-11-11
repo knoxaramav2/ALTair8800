@@ -83,7 +83,7 @@ class SharedCPU:
     def set_word(self, data, addr=None): pass
     def update_data_buffer(self) :  pass
 
-    def start_clock(self): pass
+    def start_clock(self, step_func): pass
     def stop_clock(self): pass
     def get_clock(self): pass
 

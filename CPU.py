@@ -4,30 +4,45 @@ from tkinter import BooleanVar, Tk
 from Memory import Memory
 from Shared import SharedCPU, SharedClock, SharedMachine
 from alu import ALU
+from config import GetConfig
 from decoder import Decoder
 from tk_manager import GetTK
 
 
 class Clock(SharedClock):
     __tk    : Tk
+    __cpu   : SharedCPU
+    __cmp   : SharedMachine
+    __dt    : int = 0
 
-    def tick(self):
+    def tick(self, step_fnc):
+        step_fnc()
+        self.__cpu.update_data_buffer()
+        self.__cmp.update_addr_buffer()
         self.__tk.update()
+        if self.wait.get(): return
+        self.__tk.after(10, self.tick, step_fnc)
 
-    def start(self):
+    def start(self, step_fnc):
         self.wait.set(False)
+        self.tick(step_fnc)
 
     def stop(self):
         self.wait.set(True)
 
-    def __init__(self) -> None:
+    def __init__(self, cpu:SharedCPU, cmp:SharedMachine) -> None:
         self.__tk = GetTK()
+        self.__cmp = cmp
+        self.__cpu = cpu
+        self.__dt = GetConfig().clock_rate()
+
         super().__init__(self.__tk)
         
     
 class CPU(SharedCPU):
 
     __clock : Clock
+
     alu     : ALU
     mem     : Memory
 
@@ -57,8 +72,8 @@ class CPU(SharedCPU):
         pos = self.inst_ptr+offset if not abs else offset
         return self.mem.data[pos]
 
-    def start_clock(self):
-        self.__clock.start()
+    def start_clock(self, step_fnc):
+        self.__clock.start(step_fnc)
 
     def stop_clock(self):
         self.__clock.stop()
@@ -69,7 +84,7 @@ class CPU(SharedCPU):
     def __init__(self, cmp:SharedMachine, dec:Decoder) -> None:
         super().__init__()
 
-        self.__clock = Clock()
+        self.__clock = Clock(self, cmp)
         self.alu = ALU(dec, self, cmp)
         self.mem = cmp.get_mem()
 
