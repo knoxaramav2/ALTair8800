@@ -2,16 +2,14 @@
 
 import os
 from Shared import SharedCPU, SharedMachine
+from asm import ASM
 from config import GetConfig
 from util import GetUtil
 
 
 def load_program(cmp:SharedMachine):
 
-    cpu = cmp.get_cpu()
-    mem = cmp.get_mem()
-
-    file = GetConfig().program_file()
+    file = GetConfig().program_file().lower()
     util = GetUtil()
     base_uri = util.base_uri+'\\devbin'
 
@@ -23,12 +21,22 @@ def load_program(cmp:SharedMachine):
     
     cmp.reset()
 
+    if file.endswith('.asm'): load_asm(cmp, file)
+    file = file.replace('.asm', '.prg')
+    load_prg(cmp, file)
+    
+
+def load_prg(cmp:SharedMachine, file:str):
+    
+    util = GetUtil()
+    cpu = cmp.get_cpu()
+
     base     = 0
-    offset   = 0
-    offset_i = 0
 
     f = open(file, 'r')
     lns = f.readlines()
+
+    if len(lns) == 0: return
 
     bstr = lns[0]
     if bstr.startswith('base'):
@@ -39,14 +47,16 @@ def load_program(cmp:SharedMachine):
     parr = []
     i = 0
     for ln in lns:
+        #Normalize line
         i += 1
         ln = ln.strip()
         if str.isspace(ln) or ln=='': continue
         cidx = ln.find('#')
         if cidx != -1: ln = ln[0:cidx]
+        if len(ln) >=2 and ln[1].isalpha(): ln = ln[2:]
         if not ln.replace(' ', '').isnumeric():
             if not ln.startswith('.'):
-                print(f'Invalid ASM: {i}: {ln}')
+                print(f'Invalid PRG CODE: {i}: {ln}')
                 continue
             else:
                 parr.append(ln)
@@ -61,7 +71,9 @@ def load_program(cmp:SharedMachine):
                 case _: print('Unknown label ' + nstr)
             continue
         
-        num = int(nstr, base)
+        num = nstr
+        if isinstance(nstr, str):
+            num = int(nstr, base)
 
         for i in range(0, 8):
             sw = num & (1 << i)
@@ -74,3 +86,7 @@ def load_program(cmp:SharedMachine):
     print(f'LOADED {file}:')
     for p in parr:
         print(p)
+
+def load_asm(cmp:SharedMachine, file:str):
+    asm:ASM = ASM()
+    asm.load(file)

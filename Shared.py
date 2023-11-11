@@ -83,6 +83,10 @@ class SharedCPU:
     def set_word(self, data, addr=None): pass
     def update_data_buffer(self) :  pass
 
+    def start_clock(self): pass
+    def stop_clock(self): pass
+    def get_clock(self): pass
+
     def __init__(self) -> None:
         tk = GetTK()
         
@@ -94,10 +98,18 @@ class SharedCPU:
         self.memr = BooleanVar(tk, True)
         self.intt = BooleanVar(tk, False)
         
+class SharedClock:
+
+    wait    : BooleanVar
+
+    def __init__(self, tk:Tk) -> None:
+        self.wait = BooleanVar(tk, True)
+
 class SharedCU:
 
     M1          : BooleanVar
     wait        : BooleanVar
+    sclock      : SharedClock
 
     #Interface
     def step(self): pass
@@ -109,11 +121,11 @@ class SharedCU:
     def reset(self): pass
     def read_mem(self, idx): pass
 
-    def __init__(self) -> None:
+    def __init__(self, clk:SharedClock) -> None:
         tk = GetTK()
-
+        self.sclock = clk
         self.M1 = BooleanVar(tk, True)
-        self.wait = BooleanVar(tk, True)
+        self.wait = self.sclock.wait
 
 class SharedMachine:
     power_on        : BooleanVar

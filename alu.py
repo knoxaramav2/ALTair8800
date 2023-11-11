@@ -105,7 +105,7 @@ class ALU(SharedALU):
         res = acc_val = acc_val + src_val
         self.set_math_flags(res, acc_val, 2)
 
-    #DIRECT ADDR
+    #ACCUMLATOR
     def __LDA(self, inst:int, mode:ADDR_MODE):
         addr = 0
         if mode == ADDR_MODE.IMMEDIATE:
@@ -120,7 +120,9 @@ class ALU(SharedALU):
             addr = self.read_direct(self.__scpu.mar, True)
         self.__scpu.set_word(acc, addr)
 
-    #IMM
+    #CTRL
+    def __HALT(self, inst):
+        self.__cu.halt()
 
     #JUMP
     def __JMP(self, inst, mode:ADDR_MODE):
@@ -145,6 +147,8 @@ class ALU(SharedALU):
             case ITYPE.ADD: self.__ADD(inst, addrm)
 
             case ITYPE.MOV: self.__MOV(inst, addrm)
+
+            case ITYPE.HALT: self.__HALT(inst)
 
             case ITYPE.JMP: self.__JMP(inst, addrm)
 

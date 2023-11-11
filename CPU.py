@@ -1,18 +1,33 @@
 
 
+from tkinter import BooleanVar, Tk
 from Memory import Memory
-from Shared import SharedCPU, SharedMachine
+from Shared import SharedCPU, SharedClock, SharedMachine
 from alu import ALU
 from decoder import Decoder
+from tk_manager import GetTK
 
 
-class Clock:
+class Clock(SharedClock):
+    __tk    : Tk
+
+    def tick(self):
+        self.__tk.update()
+
+    def start(self):
+        self.wait.set(False)
+
+    def stop(self):
+        self.wait.set(True)
+
     def __init__(self) -> None:
-        pass
+        self.__tk = GetTK()
+        super().__init__(self.__tk)
+        
     
 class CPU(SharedCPU):
 
-    clock   : Clock
+    __clock : Clock
     alu     : ALU
     mem     : Memory
 
@@ -21,7 +36,6 @@ class CPU(SharedCPU):
         
     def next_addr(self, ln:int=1):
         self.inst_ptr += ln
-        #print('ADDR = %s'%self.inst_ptr)
 
     def set_addr(self, addr):
         self.inst_ptr = addr
@@ -43,11 +57,19 @@ class CPU(SharedCPU):
         pos = self.inst_ptr+offset if not abs else offset
         return self.mem.data[pos]
 
+    def start_clock(self):
+        self.__clock.start()
+
+    def stop_clock(self):
+        self.__clock.stop()
+
+    def get_clock(self):
+        return self.__clock
 
     def __init__(self, cmp:SharedMachine, dec:Decoder) -> None:
         super().__init__()
 
-        self.clock = Clock()
+        self.__clock = Clock()
         self.alu = ALU(dec, self, cmp)
         self.mem = cmp.get_mem()
 

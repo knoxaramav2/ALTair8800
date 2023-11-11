@@ -35,7 +35,6 @@ class ControlUnit(SharedCU):
 
           #Interrupt
 
-
      def set_MAR(self, addr: int):
           self.__cpu.mar = addr
      
@@ -61,10 +60,12 @@ class ControlUnit(SharedCU):
           return self.__mem.get(idx)
 
      def __init__(self, scpu:SharedCPU, smem:SharedMem, sdec:Decoder) -> None:
-          super().__init__()
-
           self.__cpu = scpu
           self.__alu = scpu.alu
           self.__alu.set_cu(self)
           self.__mem = smem
           self.__dec = sdec
+          
+          super().__init__(self.__cpu.get_clock())
+
+          
