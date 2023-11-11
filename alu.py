@@ -86,9 +86,18 @@ class ALU(SharedALU):
 
     #DATA TRANSFER
     def __MOV(self, inst, mode:ADDR_MODE):
-        src_c = (inst & 0x7) + 1
-        dst_c =  ((inst & 0x38) >> 0x3) + 1
-        src_val = self.read_reg(ALU_Reg(src_c))
+
+        src_c = 0
+        dst_c = 0
+
+        if mode == ADDR_MODE.IMMEDIATE:
+            src_c = (inst & 0x7) + 1
+            dst_c =  ((inst & 0x38) >> 0x3) + 1
+            src_val = self.read_reg(ALU_Reg(src_c))
+        else:
+            src_val = self.read_direct(self.__cpu.mar, False)
+            dst_c = (inst>>3)&0x7
+        
         self.set_reg(ALU_Reg(dst_c), src_val)
 
     #REG/MEM TRANSFER
@@ -118,7 +127,6 @@ class ALU(SharedALU):
             val = self.read_reg(reg)
 
         self.set_reg(ALU_Reg.A, val)
-        print(f'LDA(x) {val:#04x}')
 
     def __STA(self, inst:int, mode:ADDR_MODE, mod:int):
         addr = 0
