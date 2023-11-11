@@ -38,10 +38,10 @@ class ALU(SharedALU):
             case ALU_Reg.L: self.__reg_HL[1] = val
             case _: print(f'ERROR: Register {reg.name} not a valid working register')
     
-    def read_flag(self, flag: ALU_Reg):
+    def read_flag(self, flag: ALU_Flag):
         return self.__flags[flag.value]
     
-    def set_flag(self, flag: ALU_Reg, val:int):
+    def set_flag(self, flag: ALU_Flag, val:int):
         self.__flags[flag.value-1] = val
 
     def read_direct(self, addr:int, two_reads:bool=False):
@@ -69,16 +69,6 @@ class ALU(SharedALU):
         self.set_flag(ALU_Flag.C, (lval >> 0x10) and not sub)
 
     #IO
-
-    #INTERRUPT
-
-    #CARRY
-
-    #NOOP
-
-    #SREG
-
-    #DREG
 
     #ROTATE
 
@@ -124,11 +114,37 @@ class ALU(SharedALU):
     def __HALT(self, inst):
         self.__cu.halt()
 
+    #COMPARE
+    def __CMP(self, inst):
+        src_c = (inst & 0x7) + 1
+        src_val = self.read_reg(ALU_Reg(src_c))
+        acc_val = self.read_reg(ALU_Reg.A)
+        diff = acc_val - src_val
+        self.set_flag(ALU_Flag.Z, diff==0)
+        self.set_flag(ALU_Flag.C, src_val > acc_val) #TODO Check sense if sign mismatch
+        self.set_flag(ALU_Flag.S, diff < 0)
+        self.set_flag(ALU_Flag.P, self.is_parity(diff, 1))
+
     #JUMP
-    def __JMP(self, inst, mode:ADDR_MODE):
-        addr = 0
-        if mode == ADDR_MODE.IMMEDIATE:
-            addr = self.read_direct(self.__scpu.mar, True)
+    def __JMP(self, inst, mode:ADDR_MODE, mod:int):
+        print(f'{inst:#02x} : {mod:#02x}')
+        
+        jmp = False
+
+        match inst:
+            case 0xC3: jmp = True #JMP
+            case 0xF2: jmp = self.read_flag(ALU_Flag.S) == 0 #JP
+            case 0xFA: jmp = self.read_flag(ALU_Flag.S) == 1 #JM
+            case 0xCA: jmp = self.read_flag(ALU_Flag.Z) == 1 #JZ
+            case 0xC2: jmp = self.read_flag(ALU_Flag.Z) == 0 #JNZ
+            case 0xDA: jmp = self.read_flag(ALU_Flag.C) == 1 #JC
+            case 0xD2: jmp = self.read_flag(ALU_Flag.C) == 0 #JNC
+            case 0xEA: jmp = self.read_flag(ALU_Flag.P) == 1 #JPE
+            case 0xE2: jmp = self.read_flag(ALU_Flag.P) == 0 #JPO
+            
+        if not jmp: return
+
+        addr = self.read_direct(self.__scpu.mar, True)
         self.__scpu.jmp_addr(addr)
 
     #CALL
@@ -151,7 +167,9 @@ class ALU(SharedALU):
 
             case ITYPE.HALT: self.__HALT(inst)
 
-            case ITYPE.JMP: self.__JMP(inst, addrm)
+            case ITYPE.JMP: self.__JMP(inst, addrm, mod)
+
+            case ITYPE.CMP: self.__CMP(inst)
 
             case _:
                 print(f'WARNING: Unrecognized instruction "{itype}"')

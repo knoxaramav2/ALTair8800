@@ -29,7 +29,7 @@ class ControlUnit(SharedCU):
           self.__mov_pc_mar()
           self.__mov_mar_mbr()
           self.__set_ir()
-
+          
           #Execute
           self.__alu.execute(self.__cpu.ir)
 

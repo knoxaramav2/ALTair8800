@@ -5,33 +5,25 @@ class Decoder:
     def inst_len(self, inst:int):
         ln = 1
 
-        hb = inst & 0xF0
-        lb = inst & 0xF
+        hb = (inst & 0xF0) >> 4
+        lb = inst & 0x0F
 
-        #TODO Make this less clunky
-        match lb:
-            case 1: 
-                if hb <= 0x3: ln = 3
-            case 2:
-                if hb >= 0xC: ln = 3
-            case 3:
-                if hb == 0xC: ln = 3
-            case 4:
-                if hb >= 0xC: ln = 3
-            case 0xA:
-                if (hb == 0x1 or hb == 0x2) or (hb >= 0xC): ln = 3
-            case 0xC:
-                if hb >= 0xC: ln = 3
-            case 0xD:
-                if hb == 0xC: ln = 3
-            case 0x3:
-                if hb == 0xD: ln = 2
-            case 0x6:
-                if (hb >= 0x0 and hb <= 0x3) or (hb >= 0xC): ln = 2
-            case 0xB:
-                if hb == 0xD: ln = 2
-            case 0xE:
-                if (hb >= 0x0 and hb <= 0x3) or (hb >= 0xC): ln = 2
+        if hb <= 0x3:
+            if lb == 0x1: ln = 3
+            elif lb == 0x2 and hb >= 0x2: ln = 3
+            elif lb == 0x6: ln = 2
+            elif lb == 0xA and hb >= 0x2: ln = 3
+            elif lb == 0xE: ln = 2
+        elif hb >= 0xC:
+            if lb == 0x2: ln = 3
+            elif lb == 0x3 and hb == 0xC: ln = 3
+            elif lb == 0x3 and hb == 0xD: ln = 2
+            elif lb == 0x4: ln = 3
+            elif lb == 0x6: ln = 2
+            elif lb == 0xA: ln = 3
+            elif lb == 0xB and hb == 0xD: ln = 2
+            elif lb == 0xC or lb == 0xD: ln = 3
+            elif lb == 0xE: ln = 2
 
         return ln
 
@@ -92,15 +84,26 @@ class Decoder:
                 itype = ITYPE.RETURN
                 mod = hb - 0xC
             elif(lb == 0x1): itype = ITYPE.POP
-            if (lb == 0x2 or lb == 0x3):
-                if (hb == 0xC): mod = 4#TODO need to fix
-                if (hb == 0xD): itype = ITYPE.OUT
-                elif (hb == 0xE): itype = ITYPE.XTHL
-                elif (hb == 0xF): itype = ITYPE.DI
+            elif (lb == 0x2 or lb == 0x3 or lb == 0xA):
+                if (lb == 0x3 and hb == 0xD): itype = ITYPE.OUT
+                elif (lb == 0x3 and hb == 0xE): itype = ITYPE.XTHL
+                elif (lb == 0x3 and hb == 0xF): itype = ITYPE.DI
                 else:
                     itype = ITYPE.JMP
                     addrm = ADDR_MODE.IMMEDIATE
-                    mod = hb
+                    mod = (hb<<2&0xC)|(lb&0x3)
+            elif (lb == 0x4 or lb == 0xC or lb == 0xD):
+                itype == ITYPE.CALL
+                mod = (hb<<2&0xC)|(lb>>2&0x2|lb&0x1)
+                addrm = ADDR_MODE.IMMEDIATE
+            elif (lb == 0x5): pass #PUSH
+            elif (lb == 0x6): pass
+            elif (lb == 0x7): pass
+            elif (lb == 0x8): pass
+            elif (lb == 0x9): pass
+            elif (lb == 0xB): pass
+            elif (lb == 0xE): pass
+            elif (lb == 0xF): pass
 
         return itype, addrm, mod
 

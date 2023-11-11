@@ -1,0 +1,11 @@
+jnz 0xC2    #JNZ
+jnc 0xD2    #JNC
+jpo 0xE2    #JPO
+jp  0xF2    #JP
+jmp 0xC3    #JMP
+jz  0xCA    #JZ
+jc  0xDA    #JC
+jpe 0xEA    #JPE
+jm  0xFA    #JM
+
+hlt
