@@ -24,9 +24,9 @@ class ALU(SharedALU):
             case ALU_Reg.E: return self.__reg_DE[1]
             case ALU_Reg.H: return self.__reg_HL[0]
             case ALU_Reg.L: return self.__reg_HL[1]
-            case ALU_Reg.BC: return self.__reg_BC[1] | self.__reg_BC[0] << 8
-            case ALU_Reg.BC: return self.__reg_DE[1] | self.__reg_DE[0] << 8
-            case ALU_Reg.BC: return self.__reg_HL[1] | self.__reg_HL[0] << 8
+            case ALU_Reg.BC: return self.__reg_BC[0] | self.__reg_BC[1] << 8
+            case ALU_Reg.DE: return self.__reg_DE[0] | self.__reg_DE[1] << 8
+            case ALU_Reg.HL: return self.__reg_HL[0] | self.__reg_HL[1] << 8
             case _: print(f'ERROR: Register {reg.name} not a valid working register')
 
     def set_reg(self, reg: ALU_Reg, val: int):
@@ -39,6 +39,15 @@ class ALU(SharedALU):
             case ALU_Reg.E: self.__reg_DE[1] = val
             case ALU_Reg.H: self.__reg_HL[0] = val
             case ALU_Reg.L: self.__reg_HL[1] = val
+            case ALU_Reg.BC: 
+                self.__reg_BC[0] = val & 0x00FF
+                self.__reg_BC[1] = val & 0xFF00
+            case ALU_Reg.DE: 
+                self.__reg_DE[0] = val & 0x00FF
+                self.__reg_DE[1] = val & 0xFF00
+            case ALU_Reg.HL: 
+                self.__reg_HL[0] = val & 0x00FF
+                self.__reg_HL[1] = val & 0xFF00            
             case _: print(f'ERROR: Register {reg.name} not a valid working register')
     
     def read_flag(self, flag: ALU_Flag):
@@ -103,23 +112,23 @@ class ALU(SharedALU):
         addr = 0
         if mode == ADDR_MODE.IMMEDIATE:
             addr = self.read_direct(self.__scpu.mar, True)
+            val = self.__cu.read_mem(addr)
         else:
-            if mod == 0: addr = self.read_reg(ALU_Reg.BC)
-            else: addr = self.read_reg(ALU_Reg.DE)
+            reg = ALU_Reg.BC if mod == 0 else ALU_Reg.DE
+            val = self.read_reg(reg)
 
-        val = self.__cu.read_mem(addr)
         self.set_reg(ALU_Reg.A, val)
+        print(f'LDA(x) {val:#04x}')
 
     def __STA(self, inst:int, mode:ADDR_MODE, mod:int):
         addr = 0
         acc = self.read_reg(ALU_Reg.A)
         if mode == ADDR_MODE.IMMEDIATE:
             addr = self.read_direct(self.__scpu.mar, True)
+            self.__scpu.set_word(acc, addr)
         else:
-            if mod == 0: addr = self.read_reg(ALU_Reg.BC)
-            else: addr = self.read_reg(ALU_Reg.DE)
-
-        self.__scpu.set_word(acc, addr)
+            reg = ALU_Reg.BC if mod == 0 else ALU_Reg.DE
+            self.set_reg(reg, acc)
 
     #CTRL
     def __HALT(self, inst):

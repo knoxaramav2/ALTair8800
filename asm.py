@@ -65,7 +65,9 @@ class ASM:
             case 'LDA':  
                 inst = 0x3A
                 arg1, arg2 = self.val_to_addr(arg1)
-            case 'LDAX': inst = 0x0A | self.reg_code1(arg1) << 0x4
+            case 'LDAX':
+                inst = 0x0A | self.reg_code1(arg1) << 0x4
+                arg1 = None
             case 'STA':  
                 inst = 0x32
                 arg1, arg2 = self.val_to_addr(arg1)
@@ -75,8 +77,12 @@ class ASM:
             case 'LXI':  
                 inst = 0x01 | self.reg_code2(arg1) << 0x4
                 arg1, arg2 = self.val_to_addr(arg1)
-            case 'INX':  inst = 0x03 | self.reg_code2(arg1) << 0x4
-            case 'INR':  inst = 0x04 | self.reg_code2(arg1) << 0x4
+            case 'INX':
+                inst = 0x03 | self.reg_code2(arg1) << 0x4
+                arg1 = None
+            case 'INR':
+                inst = 0x04 | self.reg_code2(arg1) << 0x4
+                arg1 = None
             case 'DCR':  
                 opr = self.reg_code1(arg1)
                 inst = 0x0D if opr & 0x01 else 0x05
@@ -243,14 +249,14 @@ class ASM:
 
     def get_sym_loc(self, val, offset):
         if not isinstance(val, str):
-            return f'0x{val:03o}' if val != None else None
+            return f'0o{val:03o}' if val != None else None
         val = val.removeprefix('$')
         t = 0xFF
         if  self.__data.get(val): t = list(self.__data.keys()).index(val)
         else:
             print(f'Unrecognized symbol \'{val}\'')
 
-        return f'0x{(t+offset):03o}'
+        return f'0o{(t+offset):03o}'
 
     def translate(self):
         ret = []
@@ -276,12 +282,12 @@ class ASM:
         i = 1
         for k,v in self.__data.items():
             #TODO pre write calcs
-            ret[offs + i] = f'0x{int(v,0):03o}'
+            ret[offs + i] = f'0o{int(v,8):03o}'
             i += 1
 
         i = 1
         for inst in self.__text:
-            ret[i] = f'0x{inst[0]:03o}'
+            ret[i] = f'0o{inst[0]:03o}'
             a1 = self.get_sym_loc(inst[1], inst_sz)
             a2 = self.get_sym_loc(inst[2], inst_sz)
 

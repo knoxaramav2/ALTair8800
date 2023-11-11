@@ -1,11 +1,12 @@
-cnz 0xC4    #JNZ
-cnc 0xD4    #JNC
-cpo 0xE4    #JPO
-cp  0xF4    #JP
-call 0xCD    #JMP
-cz  0xCC    #JZ
-cc  0xDC    #JC
-cpe 0xEC    #JPE
-cm  0xFC    #JM
+lda $T1
+mov d, a
+lda $T2
+add d
+stax B
+lda $T3
+ldax B
 
-hlt
+.data
+T1 4
+T2 3
+T3 66
