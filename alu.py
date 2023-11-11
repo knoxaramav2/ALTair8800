@@ -126,7 +126,7 @@ class ALU(SharedALU):
         self.set_flag(ALU_Flag.P, self.is_parity(diff, 1))
 
     #JUMP
-    def __JMP(self, inst, mode:ADDR_MODE, mod:int):
+    def __JMP(self, inst):
 
         jmp = False
 
@@ -147,8 +147,7 @@ class ALU(SharedALU):
         self.__scpu.jmp_addr(addr)
 
     #CALL
-    def __CALL(self, inst, mode:ADDR_MODE, mod:int):
-        print(f'{inst:#02x} : {mod:#02x}')
+    def __CALL(self, inst:int):
         
         call = False
 
@@ -165,7 +164,31 @@ class ALU(SharedALU):
 
         if not call: return
 
+        self.__scpu.push_stack(self.__scpu.inst_ptr)
+        addr = self.read_direct(self.__scpu.mar, True)
+        self.__scpu.jmp_addr(addr)
+
     #RETURN
+
+    def __RET(self, inst:int):
+        
+        ret = False
+
+        match inst:
+            case 0xCD: ret = True #CALL
+            case 0xF0: ret = self.read_flag(ALU_Flag.S) == 0 #RP
+            case 0xF8: ret = self.read_flag(ALU_Flag.S) == 1 #RM
+            case 0xC8: ret = self.read_flag(ALU_Flag.Z) == 1 #RZ
+            case 0xC0: ret = self.read_flag(ALU_Flag.Z) == 0 #RNZ
+            case 0xD8: ret = self.read_flag(ALU_Flag.C) == 1 #RC
+            case 0xD0: ret = self.read_flag(ALU_Flag.C) == 0 #RNC
+            case 0xE8: ret = self.read_flag(ALU_Flag.P) == 1 #RPE
+            case 0xE0: ret = self.read_flag(ALU_Flag.P) == 0 #RPO
+
+        if not ret: return
+        
+        addr = self.__scpu.pop_stack()
+        self.__scpu.jmp_addr(addr)
 
     def execute(self, inst:int):
         itype, addrm, mod = self.__dec.decode_inst(inst)
@@ -183,7 +206,9 @@ class ALU(SharedALU):
 
             case ITYPE.HALT: self.__HALT(inst)
 
-            case ITYPE.JMP: self.__JMP(inst, addrm, mod)
+            case ITYPE.CALL: self.__CALL(inst)
+            case ITYPE.RETURN: self.__RET(inst)
+            case ITYPE.JMP: self.__JMP(inst)
 
             case ITYPE.CMP: self.__CMP(inst)
 

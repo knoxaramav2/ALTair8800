@@ -60,6 +60,7 @@ class SharedALU:
 
 class SharedCPU:
     inst_ptr        : int = 0
+    stck_ptr        : int = 0
     mem_addr_reg    : int = 0
     mem_bffr_reg    : int = 0
 
@@ -82,6 +83,9 @@ class SharedCPU:
     def read_direct(self, offset:int): pass
     def set_word(self, data, addr=None): pass
     def update_data_buffer(self) :  pass
+
+    def push_stack(self, val:int):pass
+    def pop_stack(self):pass
 
     def start_clock(self, step_func): pass
     def stop_clock(self): pass

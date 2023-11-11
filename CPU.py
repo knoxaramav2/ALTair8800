@@ -4,7 +4,7 @@ from tkinter import BooleanVar, Tk
 from Memory import Memory
 from Shared import SharedCPU, SharedClock, SharedMachine
 from alu import ALU
-from config import GetConfig
+from config import Config, GetConfig
 from decoder import Decoder
 from tk_manager import GetTK
 
@@ -46,8 +46,11 @@ class CPU(SharedCPU):
     alu     : ALU
     mem     : Memory
 
+    __cnf   : Config
+
     def reset(self):
         self.inst_ptr = 0
+        self.stck_ptr = self.__cnf.mem_size()
         
     def next_addr(self, ln:int=1):
         self.inst_ptr += ln
@@ -72,6 +75,15 @@ class CPU(SharedCPU):
         pos = self.inst_ptr+offset if not abs else offset
         return self.mem.data[pos]
 
+    def push_stack(self, val: int):
+        self.stck_ptr -= 1
+        self.mem.set_mem(self.stck_ptr, val)
+        
+    def pop_stack(self):
+        v = self.mem.get(self.stck_ptr)
+        self.stck_ptr += 1
+        return v
+
     def start_clock(self, step_fnc):
         self.__clock.start(step_fnc)
 
@@ -84,6 +96,9 @@ class CPU(SharedCPU):
     def __init__(self, cmp:SharedMachine, dec:Decoder) -> None:
         super().__init__()
 
+        self.__cnf = GetConfig()
+
+        self.reset()
         self.__clock = Clock(self, cmp)
         self.alu = ALU(dec, self, cmp)
         self.mem = cmp.get_mem()
