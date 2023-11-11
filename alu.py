@@ -24,6 +24,9 @@ class ALU(SharedALU):
             case ALU_Reg.E: return self.__reg_DE[1]
             case ALU_Reg.H: return self.__reg_HL[0]
             case ALU_Reg.L: return self.__reg_HL[1]
+            case ALU_Reg.BC: return self.__reg_BC[1] | self.__reg_BC[0] << 8
+            case ALU_Reg.BC: return self.__reg_DE[1] | self.__reg_DE[0] << 8
+            case ALU_Reg.BC: return self.__reg_HL[1] | self.__reg_HL[0] << 8
             case _: print(f'ERROR: Register {reg.name} not a valid working register')
 
     def set_reg(self, reg: ALU_Reg, val: int):
@@ -96,18 +99,26 @@ class ALU(SharedALU):
         self.set_math_flags(res, acc_val, 2)
 
     #ACCUMLATOR
-    def __LDA(self, inst:int, mode:ADDR_MODE):
+    def __LDA(self, inst:int, mode:ADDR_MODE, mod:int):
         addr = 0
         if mode == ADDR_MODE.IMMEDIATE:
             addr = self.read_direct(self.__scpu.mar, True)
+        else:
+            if mod == 0: addr = self.read_reg(ALU_Reg.BC)
+            else: addr = self.read_reg(ALU_Reg.DE)
+
         val = self.__cu.read_mem(addr)
         self.set_reg(ALU_Reg.A, val)
 
-    def __STA(self, inst:int, mode:ADDR_MODE):
+    def __STA(self, inst:int, mode:ADDR_MODE, mod:int):
         addr = 0
         acc = self.read_reg(ALU_Reg.A)
         if mode == ADDR_MODE.IMMEDIATE:
             addr = self.read_direct(self.__scpu.mar, True)
+        else:
+            if mod == 0: addr = self.read_reg(ALU_Reg.BC)
+            else: addr = self.read_reg(ALU_Reg.DE)
+
         self.__scpu.set_word(acc, addr)
 
     #CTRL
@@ -186,7 +197,7 @@ class ALU(SharedALU):
             case 0xE0: ret = self.read_flag(ALU_Flag.P) == 0 #RPO
 
         if not ret: return
-        
+
         addr = self.__scpu.pop_stack()
         self.__scpu.jmp_addr(addr)
 
@@ -196,8 +207,8 @@ class ALU(SharedALU):
         print(f'EXEC: {inst:#08b} : {itype.name:<6}   {addrm.name}')
 
         match itype:
-            case ITYPE.LDA: self.__LDA(inst, addrm)
-            case ITYPE.STA: self.__STA(inst, addrm)
+            case ITYPE.LDA: self.__LDA(inst, addrm, mod)
+            case ITYPE.STA: self.__STA(inst, addrm, mod)
             
             case ITYPE.ADD: self.__ADD(inst, addrm)
             case ITYPE.SUB: self.__SUB(inst, addrm)

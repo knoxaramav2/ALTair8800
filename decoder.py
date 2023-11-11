@@ -45,7 +45,10 @@ class Decoder:
             elif (lb == 0x2):
                 addrm = ADDR_MODE.IMMEDIATE
                 if (hb == 0x2): itype = ITYPE.SHLD
-                else: itype = ITYPE.STA
+                else: 
+                    itype = ITYPE.STA
+                    mod = hb
+                    if hb <= 0x1: addrm = ADDR_MODE.REGISTER
             elif (lb == 0x3 or lb == 0x4 or lb == 0xC): itype = ITYPE.INX
             elif (lb == 0x5 or lb == 0xB or lb == 0xD): itype = ITYPE.DCX
             elif (lb == 0x6 or lb == 0xE): itype = ITYPE.MVI
