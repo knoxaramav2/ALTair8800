@@ -18,7 +18,7 @@ class ControlUnit(SharedCU):
 
      def __mov_mar_mbr(self):
           self.__cpu.mbr = self.__mem.get(self.__cpu.mar)
-          self.__inst_len = self.__dec.inst_len(self.__cpu.mbr)
+          self.__inst_len = self.__dec.inst_len(self.__cpu.mbr)+1
           
      def __set_ir(self):
           self.__cpu.ir = self.__cpu.mbr          

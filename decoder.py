@@ -1,8 +1,6 @@
 from enum import Enum
 import os
-import re
 from config import GetConfig
-from inst_info import ADDR_MODE, ITYPE
 from util import GetUtil
 
 ADDRM = Enum(
@@ -79,7 +77,7 @@ class OP:
     def __init__(self, name:str, inst:int, op:OPCODE, addrm:ADDRM, sz:int, alt:int) -> None:
         self.name = name
         self.inst = inst
-        self.op = op
+        self.opcode = op
         self.addrm = addrm
         self.sz = sz
         self.alt = alt
@@ -101,7 +99,7 @@ class alu_matrix:
                 print(f'{n.name:<6}', end='')
             print('')
         print('')
-        exit()
+
 
     def parse_line(self, ln:str):
         cmnt = ln.find('#')
@@ -166,38 +164,17 @@ class Decoder:
     __matrix : alu_matrix
 
     def inst_len(self, inst:int):
-        ln = 1
+        op = self.decode_inst(inst)
+        return op.sz
 
-        hb = (inst & 0xF0) >> 4
-        lb = inst & 0x0F
-
-        if hb <= 0x3:
-            if lb == 0x1: ln = 3
-            elif lb == 0x2 and hb >= 0x2: ln = 3
-            elif lb == 0x6: ln = 2
-            elif lb == 0xA and hb >= 0x2: ln = 3
-            elif lb == 0xE: ln = 2
-        elif hb >= 0xC:
-            if lb == 0x2: ln = 3
-            elif lb == 0x3 and hb == 0xC: ln = 3
-            elif lb == 0x3 and hb == 0xD: ln = 2
-            elif lb == 0x4: ln = 3
-            elif lb == 0x6: ln = 2
-            elif lb == 0xA: ln = 3
-            elif lb == 0xB and hb == 0xD: ln = 2
-            elif lb == 0xC or lb == 0xD: ln = 3
-            elif lb == 0xE: ln = 2
-
-        return ln
-
-    def decode_inst(self, inst:int) -> [ITYPE, ADDR_MODE, int]:
+    def decode_inst(self, inst:int) -> OP:
         
         hb = inst >> 0x4
         lb = inst & 0xF
        
         op = self.__matrix.get(lb, hb)
 
-        return OP
+        return op
 
     def __init__(self) -> None:
         cfg = GetConfig()

@@ -5,7 +5,7 @@ add d
 stax B
 lda $T3
 ldax B
-
+jmp 0x0
 .data
 T1 4
 T2 3
