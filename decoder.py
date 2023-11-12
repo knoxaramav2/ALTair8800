@@ -1,7 +1,170 @@
+from enum import Enum
+import os
+import re
+from config import GetConfig
 from inst_info import ADDR_MODE, ITYPE
+from util import GetUtil
+
+ADDRM = Enum(
+    'ADDRM', [
+        'DIR',
+        'IMM',
+        'REG',
+        'IMP'
+    ]
+)
+
+OPCODE = Enum(
+    'OP', [
+        'NOP',
+        #IO
+        'IN', 'OUT',        #IMM
+
+        #Math/Logic
+        'ADD', 'SUB',       #IMM, REG
+        'ALG',              #Acc Logic
+        'DAD',              #REG
+        
+        #Data Transfer
+        'LDA', 'STA',     #IMM, DIR
+        'LHLD', 'SHLD',     #DIR
+        'SPHL', 'XTHL',     #DIR
+        'LXI',
+        'MOV',              #IMM, REG
+
+        #Rotate
+        'ROT',              #Left/Right/w/wo Carry
+
+        #Comparison
+        'CMP',              #IMM, REG
+
+        #Jump
+        'JMP',              #IMM, REG 
+        'CALL',
+
+        #Return
+        'RET',              #IMP, REG
+
+        #Control
+        'RST',              #REG
+        'HALT',             #IMP
+
+        #Register
+        'INR', 'DCR',
+
+        #Flag
+        'CRA',              #Carry adjust
+
+        #Accu
+        'AAC',              #Accu adjust
+
+        #Stack
+        'XCHG',             #DIR
+        'POP', 'PUSH',      #REG
+
+        #INTERRUPT
+        'INT'               #(Enable/Disable)
+
+    ]
+)
+
+class OP:
+    name  : str #OP Name
+    opcode: OPCODE    #Operand family
+    addrm : ADDRM #Address mode
+    sz    : int   #Size in bytes
+    alt   : int   #Operation mode
+    inst  : int  #Raw instruction
+
+    def __init__(self, name:str, inst:int, op:OPCODE, addrm:ADDRM, sz:int, alt:int) -> None:
+        self.name = name
+        self.inst = inst
+        self.op = op
+        self.addrm = addrm
+        self.sz = sz
+        self.alt = alt
+
+class alu_matrix:
+
+    __alu_grid  :[] = []
+    __nop       : OP
+
+    def write_grid(self):
+        print('    ', end='')
+        for lb in range(0x0, 0x10):
+            print(f'x{lb:#01x}    '[2:].upper(), end='')
+        print('')
+        for hb in range(0, 0x10):
+            print(f'{hb:#01x}x  '[2:].upper(), end='')
+            for lb in range(0, 0x10):
+                n = self.get(lb, hb)
+                print(f'{n.name:<6}', end='')
+            print('')
+        print('')
+        exit()
+
+    def parse_line(self, ln:str):
+        cmnt = ln.find('#')
+        if cmnt != -1: ln = ln[:cmnt]
+        ln = ln.strip().upper()
+        if ln == '': return
+        k, v = ln.split(':', 1)
+        trms = v.split(',',4)
+
+        fam    = trms[0]
+        addrm   = ADDRM[trms[1]]
+        sz      = int(trms[2], 0)
+        alt     = int(trms[3], 0)
+        r       = trms[4][1:len(trms[4])-1].split(',')
+        r1      = r[0].split(':')
+        r2      = r[1].split(':')
+        lb_s    = int(r2[0], 0)
+        lb_e    = lb_s
+        hb_s    = int(r1[0], 0)
+        hb_e    = hb_s     
+
+        if len(r1) == 2: hb_e = int(r1[1], 0)
+        if len(r2) == 2: lb_e = int(r2[1], 0)
+        
+        for l in range(lb_s, lb_e+1): 
+            for h in range(hb_s, hb_e+1):
+                n = OP(k, (h<<4)|l, OPCODE[fam], addrm, sz, alt)
+                self.__alu_grid[l][h] = n
+        
+
+    def get(self, lb, hb):
+        ret = self.__alu_grid[lb][hb]
+
+        if ret == None: ret = OP('NOP', 0, OPCODE.NOP, 1, 0, 0)
+        
+        return ret
+
+    def __load_profile(self, profile:str):
+        
+        util = GetUtil()
+        cfg_path = os.path.join(util.cfg_uri, profile)
+
+        for lb in range(0x0, 0x10):
+            self.__alu_grid.append([])
+            for hb in range(0x0, 0x10):
+                self.__alu_grid[lb].append(None)
+
+        f = open(cfg_path, 'r')
+        raw = f.readlines()
+        f.close()
+
+        for ln in raw:
+            self.parse_line(ln)
+
+        self.write_grid()
+
+    def __init__(self, profile:str) -> None:
+        self.__load_profile(profile)
 
 class Decoder:
-    
+
+    __matrix : alu_matrix
+
     def inst_len(self, inst:int):
         ln = 1
 
@@ -29,94 +192,13 @@ class Decoder:
 
     def decode_inst(self, inst:int) -> [ITYPE, ADDR_MODE, int]:
         
-        addrm   : ADDR_MODE = ADDR_MODE.REGISTER
-        itype    : ITYPE = ITYPE.NOP
         hb = inst >> 0x4
         lb = inst & 0xF
-        mod = 0
+       
+        op = self.__matrix.get(lb, hb)
 
-        if (hb >= 0x0 and hb <= 0x4) and (lb == 0x1 or lb == 0x6 or lb == 0xE):
-            itype = ADDR_MODE.IMMEDIATE
-        elif (hb == 0x2 or hb == 0x3) and (lb == 0x2 or lb == 0xA):
-            itype == ADDR_MODE.DIRECT
-        
-        if (hb >= 0x0 and hb <= 0x3):
-            if (lb == 0x1): itype = ITYPE.LXI
-            elif (lb == 0x2):
-                addrm = ADDR_MODE.IMMEDIATE
-                if (hb == 0x2): itype = ITYPE.SHLD
-                else: 
-                    itype = ITYPE.STA
-                    mod = hb
-                    if hb <= 0x1: addrm = ADDR_MODE.REGISTER
-            elif (lb == 0x3 or lb == 0x4 or lb == 0xC): 
-                if lb == 0x3: mode = 1
-                itype = ITYPE.INX
-            elif (lb == 0x5 or lb == 0xB or lb == 0xD): 
-                if lb == 0xB: mod = 1
-                itype = ITYPE.DCX
-            elif (lb == 0x6 or lb == 0xE): itype = ITYPE.MVI
-            elif (lb == 0x7 or lb == 0xF): 
-                if (hb == 0x0 or hb == 0x1):
-                    itype = ITYPE.ROT
-                    mod = hb
-                elif (hb == 0x3): 
-                    itype = ITYPE.ACCU
-                    mod = int(hb == 0x7)
-                else:
-                    itype = ITYPE.CARRY
-                    mod = int(hb == 0x7)
-            elif (lb == 0x9): itype = ITYPE.DAD
-            elif (lb == 0xA):
-                addrm = ADDR_MODE.IMMEDIATE
-                if (hb == 0x2): itype = ITYPE.LHLD
-                else: 
-                    if hb <= 1: addrm = ADDR_MODE.REGISTER
-                    itype = ITYPE.LDA
-                    
-        elif (hb >= 0x4 and hb <= 0x7):
-            if (lb == 0x6): itype = ITYPE.HALT
-            else: itype = ITYPE.MOV
-        elif (hb == 0x8):
-            itype = ITYPE.ADD
-            mod = int(lb < 0x8)
-        elif (hb == 0x9):
-            itype = ITYPE.SUB
-            mod = int(lb < 0x8)
-        elif (hb == 0xA):
-            if (lb < 0x8): itype = ITYPE.AND
-            else: itype = ITYPE.XOR
-        elif (hb == 0xB):
-            if (lb < 0x8): itype = ITYPE.OR
-            else: itype = ITYPE.CMP
-        else:#C-F
-            if (lb == 0x0):
-                itype = ITYPE.RETURN
-                mod = hb - 0xC
-            elif(lb == 0x1): itype = ITYPE.POP
-            elif (lb == 0x2 or lb == 0x3 or lb == 0xA):
-                if (lb == 0x3 and hb == 0xD): itype = ITYPE.OUT
-                elif (lb == 0x3 and hb == 0xE): itype = ITYPE.XTHL
-                elif (lb == 0x3 and hb == 0xF): itype = ITYPE.DI
-                else:
-                    itype = ITYPE.JMP
-                    addrm = ADDR_MODE.IMMEDIATE
-                    mod = (hb<<2&0xC)|(lb&0x3)
-            elif (lb == 0x4 or lb == 0xC or lb == 0xD):
-                itype == ITYPE.CALL
-                mod = (hb<<2&0xC)|(lb>>2&0x2|lb&0x1)
-                addrm = ADDR_MODE.IMMEDIATE
-            elif (lb == 0x5): pass #PUSH
-            elif (lb == 0x6): pass
-            elif (lb == 0x7): pass
-            elif (lb == 0x8): pass
-            elif (lb == 0x9): pass
-            elif (lb == 0xB): pass
-            elif (lb == 0xE): pass
-            elif (lb == 0xF): pass
-
-        return itype, addrm, mod
-
+        return OP
 
     def __init__(self) -> None:
-        pass
+        cfg = GetConfig()
+        self.__matrix = alu_matrix(cfg.alu_profile())

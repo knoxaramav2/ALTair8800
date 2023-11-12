@@ -81,8 +81,13 @@ class SharedCPU:
     def set_addr(self, addr): pass
     def jmp_addr(self, idx:int): pass
     def read_direct(self, offset:int): pass
+    def write_direct(self, offset:int): pass
     def set_word(self, data, addr=None): pass
     def update_data_buffer(self) :  pass
+
+    def get_instr(self): pass
+    def get_mar(self): pass
+    def get_mbr(self): pass
 
     def push_stack(self, val:int):pass
     def pop_stack(self):pass

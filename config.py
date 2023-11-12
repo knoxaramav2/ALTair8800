@@ -12,12 +12,14 @@ class Config:
     __dbg_mode__    = False
 
     __prg_file__    = ''
+    __alu_file__    = 'alu.cfg'
 
     def mem_size(self): return self.__mem_size__
     def stack_size(self): return self.__stack_size__
     def debug_mode(self): return self.__dbg_mode__
     def program_file(self): return self.__prg_file__
     def clock_rate(self): return self.__clock_rate__
+    def alu_profile(self): return self.__alu_file__
 
     def __parse_cmd(self, arg:str):
         terms = arg.split('=')
@@ -36,6 +38,7 @@ class Config:
             case '--stacksize': self.__stack_size__=int(v)
 
             case '--program': self.__prg_file__ = v
+            case '--aludecode': self.__dec_file__ = v
 
             case '--clockrate': self.__clock_rate__ = v
 

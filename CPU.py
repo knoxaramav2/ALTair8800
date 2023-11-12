@@ -68,12 +68,28 @@ class CPU(SharedCPU):
     def read_direct(self, offset: int):
         return self.read_mem(self.mar+offset, True)
 
+    def write_direct(self, offset: int):
+        self.write_mem(self.mar+offset, True)
+
     def update_data_buffer(self) :
         self.mem.set_curr_buffer(self.inst_ptr)
+
+    def get_instr(self):
+        return self.inst_ptr
+    
+    def get_mar(self):
+        return self.mar
+    
+    def get_mbr(self):
+        return self.mbr
 
     def read_mem(self, offset:int=0, abs:bool=False):
         pos = self.inst_ptr+offset if not abs else offset
         return self.mem.data[pos]
+
+    def write_mem(self, offset:int=0, data:int=0, abs:bool=False):
+        pos = self.inst_ptr+offset if not abs else offset
+        self.mem.data[pos] = data
 
     def push_stack(self, val: int):
         self.stck_ptr -= 1

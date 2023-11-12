@@ -13,12 +13,12 @@ ITYPE = Enum(
     'itype',[
         'NOP',
         'LDA', 'LXI',
+        'SHLD', 'LHLD', 'SPHL',
         'INX', 'DCX',
         'STA',
-        'SHLD', 'LHLD',
         'ROT',
         'CARRY', 'ACCU',
-        'MOV',
+        'MOV', 'XCHG',
         'HALT',
         'ADD', 'DAD',
         'SUB',
@@ -26,6 +26,8 @@ ITYPE = Enum(
         'RETURN',
         'POP', 'PUSH',
         'JMP', 'CALL',
-        'OUT', 'IN', 'XTHL', 'DI'
+        'OUT', 'IN', 'XTHL', 'DI',
+        'INT',
+        'RESET'
     ]
 )

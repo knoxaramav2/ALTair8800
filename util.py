@@ -9,6 +9,7 @@ class Util:
     base_uri    : str
     rsc_uri     : str
     font_uri    : str
+    cfg_uri     : str
 
     def int_to_boolarr(self, val:int, arr:[BooleanVar]) -> None:
         val = int(val)
@@ -32,6 +33,7 @@ class Util:
         self.base_uri = os.path.dirname(__file__)
         self.rsc_uri = os.path.join(self.base_uri, 'rsc')
         self.font_uri = os.path.join(self.rsc_uri, 'fonts')
+        self.cfg_uri = os.path.join(self.base_uri, 'config')
 
     def __init__(self) -> None:
         self.__load_path()

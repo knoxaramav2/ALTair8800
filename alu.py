@@ -70,6 +70,14 @@ class ALU(SharedALU):
             hb = self.__scpu.read_direct(2)
         return (hb<<0x8)|lb
 
+    def write_direct(self, addr:int, data:int, two_writes:bool=False):
+        lb = data&0x00FF
+        hb = data&0xFF00
+        self.__scpu.write_direct(1, lb)
+        if two_writes:
+            self.__scpu.write_direct(2, hb)
+
+
     #TODO worth keeping for sake of consistency?
     def is_parity(self, val:int, bytes:int): 
         sh = 1
@@ -90,6 +98,13 @@ class ALU(SharedALU):
 
 
     #IO
+    def __OUT(self, inst:int):
+        addr = self.read_direct(self.__scpu.mar, False)
+        #TODO Send to dev. no
+    
+    def __IN(self, inst:int):
+        addr = self.read_direct(self.__scpu.mar, False)
+        #TODO load from dev. no
 
     #DATA TRANSFER
     def __MOV(self, inst, mode:ADDR_MODE):
@@ -106,6 +121,24 @@ class ALU(SharedALU):
             dst_c = (inst>>3)&0x7
         
         self.set_reg(ALU_Reg(dst_c), src_val)
+
+    def __XCHG(self):
+        tmp = self.read_reg(ALU_Reg.HL)
+        self.set_reg(ALU_Reg.HL, self.read_reg(ALU_Reg.DE))
+        self.set_reg(ALU_Reg.DE, tmp)
+
+    def __LHLD(self, inst):
+        val = self.read_direct(self.__scpu.mar, True)
+        self.set_reg(ALU_Reg.HL, val)
+
+    def __SHLD(self, inst):
+        val = self.read_reg(ALU_Reg.HL)
+        self.write_direct(self.__scpu.mar, val, True)
+
+
+    def __SPHL(self, inst):
+        val = self.read_reg(ALU_Reg.HL)
+        self.__scpu.stck_ptr = val
 
     #REGISTER MODIFY
     def __INR(self, inst, mod:int):
@@ -124,19 +157,83 @@ class ALU(SharedALU):
 
     #REG/MEM TRANSFER
     def __ADD(self, inst:int, mode:ADDR_MODE):
-        src_c = (inst & 0x7) + 1
-        src_val = self.read_reg(ALU_Reg(src_c))
+
         acc_val = self.read_reg(ALU_Reg.A)
-        res = acc_val = acc_val + src_val
+        val = 0
+
+        if mode == ADDR_MODE.DIRECT:
+            val = self.read_direct(self.__scpu.mar)
+        else:
+            src_c = (inst & 0x7) + 1
+            val = self.read_reg(ALU_Reg(src_c))
+            
+        res  = acc_val + val
         self.set_reg(ALU_Reg.A, res)
         self.set_math_flags(res, acc_val, 2)
 
     def __SUB(self, inst:int, mode:ADDR_MODE):
-        src_c = (inst & 0x7) + 1
-        src_val = self.read_reg(ALU_Reg(src_c))
+
         acc_val = self.read_reg(ALU_Reg.A)
-        res = acc_val = acc_val + src_val
-        self.set_math_flags(res, acc_val, 2)
+        val = 0
+
+        if mode == ADDR_MODE.DIRECT:
+            val = self.read_direct(self.__scpu.mar)
+        else:
+            src_c = (inst & 0x7) + 1
+            val = self.read_reg(ALU_Reg(src_c))
+        
+        res = acc_val - val
+        self.set_reg(ALU_Reg.A, res)
+        self.set_math_flags(res, acc_val, 2, True)
+
+    def __AND(self, inst, addrm):
+        
+        val = 0
+        acc = self.read_reg(ALU_Reg.A)
+
+        if addrm == ADDR_MODE.IMMEDIATE:
+            val = self.read_direct(self.__scpu.get_mar())
+        else:
+            val = self.read_reg(ALU_Reg(inst&0x7))
+
+        res = val & acc
+
+        self.set_flag(ALU_Flag.C, False)
+        self.set_flag(ALU_Flag.P, self.is_parity(res))
+        self.set_flag(ALU_Flag.Z, res == 0)
+        self.set_flag(ALU_Flag.S, res < 0)
+
+    def __OR(self, inst, addrm):
+        val = 0
+        acc = self.read_reg(ALU_Reg.A)
+
+        if addrm == ADDR_MODE.IMMEDIATE:
+            val = self.read_direct(self.__scpu.get_mar())
+        else:
+            val = self.read_reg(ALU_Reg(inst&0x7))
+
+        res = val | acc
+
+        self.set_flag(ALU_Flag.C, False)
+        self.set_flag(ALU_Flag.P, self.is_parity(res))
+        self.set_flag(ALU_Flag.Z, res == 0)
+        self.set_flag(ALU_Flag.S, res < 0)
+    
+    def __XOR(self, inst, addrm):
+        val = 0
+        acc = self.read_reg(ALU_Reg.A)
+
+        if addrm == ADDR_MODE.IMMEDIATE:
+            val = self.read_direct(self.__scpu.get_mar())
+        else:
+            val = self.read_reg(ALU_Reg(inst&0x7))
+
+        res = val ^ acc
+
+        self.set_flag(ALU_Flag.C, False)
+        self.set_flag(ALU_Flag.P, self.is_parity(res))
+        self.set_flag(ALU_Flag.Z, res == 0)
+        self.set_flag(ALU_Flag.S, res < 0)
 
     #ACCUMLATOR
     def __LDA(self, inst:int, mode:ADDR_MODE, mod:int):
@@ -177,12 +274,17 @@ class ALU(SharedALU):
         elif mod == 4: #RAR
             acc = (acc >> 1) | c << 7
             c = b0
-            
+
         self.set_flag(ALU_Flag.C, b7)
 
     #CTRL
     def __HALT(self, inst):
         self.__cu.halt()
+
+    def __RESET(self, inst):
+        addr = inst & 0x38
+        self.__scpu.push_stack(self.__scpu.get_instr())
+        self.__scpu.set_addr(addr)
 
     #COMPARE
     def __CMP(self, inst):
@@ -190,6 +292,7 @@ class ALU(SharedALU):
         src_val = self.read_reg(ALU_Reg(src_c))
         acc_val = self.read_reg(ALU_Reg.A)
         diff = acc_val - src_val
+
         self.set_flag(ALU_Flag.Z, diff==0)
         self.set_flag(ALU_Flag.C, src_val > acc_val) #TODO Check sense if sign mismatch
         self.set_flag(ALU_Flag.S, diff < 0)
@@ -268,25 +371,42 @@ class ALU(SharedALU):
         print(f'EXEC: {inst:#08b} : {itype.name:<6}   {addrm.name}')
 
         match itype:
+            case ITYPE.IN: self.__IN(inst)
+            case ITYPE.OUT: self.__OUT(inst)
+
             case ITYPE.LDA: self.__LDA(inst, addrm, mod)
             case ITYPE.STA: self.__STA(inst, addrm, mod)
             case ITYPE.ROT: self.__ROT(inst, mod)
             
+            case ITYPE.LHLD: self.__LHLD(inst)
+            case ITYPE.SPHL: self.__SPHL(inst)
+            case ITYPE.SHLD: self.__SHLD(inst)
+            
             case ITYPE.ADD: self.__ADD(inst, addrm)
             case ITYPE.SUB: self.__SUB(inst, addrm)
 
+            case ITYPE.AND: self.__AND(inst, addrm)
+            case ITYPE.OR: self.__OR(inst, addrm)
+            case ITYPE.XOR: self.__XOR(inst, addrm)
+
             case ITYPE.MOV: self.__MOV(inst, addrm)
+            case ITYPE.XCHG: self.__XCHG()
 
             case ITYPE.INX: self.__INR(inst, mod)
             case ITYPE.DCX: self.__DCR(inst, mod)
 
             case ITYPE.HALT: self.__HALT(inst)
+            case ITYPE.RESET: self.__RESET(inst)
 
             case ITYPE.CALL: self.__CALL(inst)
             case ITYPE.RETURN: self.__RET(inst)
             case ITYPE.JMP: self.__JMP(inst)
 
             case ITYPE.CMP: self.__CMP(inst)
+
+            case ITYPE.RESET: self.__RESET(inst)
+
+            case ITYPE.NOP: pass
 
             case _:
                 print(f'WARNING: Unrecognized instruction "{itype}"')
@@ -302,4 +422,5 @@ class ALU(SharedALU):
         self.__cmp = scmp
         self.__dec = dec
         self.__scpu = scpu
+
 
