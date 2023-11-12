@@ -2,19 +2,21 @@
 
 import os
 from Shared import SharedCPU, SharedMachine
+from UI import UI
 from asm import ASM
 from config import GetConfig
 from util import GetUtil
 
 
-def load_program(cmp:SharedMachine):
+def load_program(cmp:SharedMachine, ui:UI):
 
-    file = GetConfig().program_file().lower()
     util = GetUtil()
-    base_uri = util.base_uri+'\\devbin'
-
+    uri = util.base_uri+'\\devbin'
+    file = ui.file_dialog(uri)
+    #file = GetConfig().program_filed().lower()
+    
     if os.path.isfile(file) == False:
-        file = os.path.join(base_uri, file)
+        file = os.path.join(uri, file)
         if os.path.isfile(file) == False:
             f'Cannot open \'{file}\''
             return

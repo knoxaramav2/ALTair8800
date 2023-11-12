@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["--mem=1024", "-d", "--program=dev3.asm"]
+            "args": ["--mem=1024", "-d", "--program=basic_calc.asm"]
         }
     ]
 }

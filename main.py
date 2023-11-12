@@ -10,7 +10,7 @@ print('START')
 comp = Machine()
 ui = UI(comp)
 
-init_hotkeys(comp)
+init_hotkeys(comp, ui)
 
 ui.run()
 

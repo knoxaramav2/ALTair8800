@@ -7,7 +7,7 @@ from defs import *
 from rsc import RSC, GetRSC
 from tk_manager import GetTK
 from util import GetUtil, Util
-from tkinter import Button, Checkbutton, Radiobutton, Tk, Label, IntVar, BooleanVar, Canvas
+from tkinter import Button, Checkbutton, Radiobutton, Tk, Label, IntVar, BooleanVar, Canvas, filedialog as fd
 
 
 class UI:
@@ -43,6 +43,11 @@ class UI:
         self.util.set_trans(self.cvc)
         self.root.update()
         self.root.mainloop()
+
+    def file_dialog(self, s_dir:str):
+        ret = fd.askopenfilename(initialdir=s_dir)
+
+        return ret
 
     def __create_label(self, ctrl:Ctrl, adj_y=0):
         x = ctrl.base.winfo_x()
