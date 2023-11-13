@@ -7,6 +7,7 @@ Seg = Enum(
     'SEG', [
         'TEXT',
         'DATA',
+        'BSS',
     ]
 )
 
@@ -20,6 +21,8 @@ class ASM:
     __text      : [(int, str, str)]     = []
     # label, value
     __data      : dict      = {}
+    __bss       : dict      = {}
+    __labels     : dict      = {}
     
     def reg_code1(self, r:str):
         match r:
@@ -46,12 +49,22 @@ class ASM:
 
     def val_to_addr(self, val:str):
 
-        if val.startswith('$'): return val, 0
+        if val.startswith(('$',':')): return val, 0
 
         tval = int(val, base=0)
         lb = tval & 0x00FF
         hb = tval & 0xFF00
         return lb, hb
+
+    def try_str_int(self, val:str):
+
+        if val == None or isinstance(val, int): return val
+
+        try:
+            ret = int(val, 0)
+            return ret
+        except:
+            return val
 
     def add_text(self, ln:str):
         trms = re.split(' |,|\t|\n', ln)
@@ -60,6 +73,11 @@ class ASM:
         arg1 = trms[1] if len(trms) >= 2 else None
         arg2 = trms[2] if len(trms) >= 3 else None
         inst:  int = 0x0
+
+        if ln.startswith(':'):
+            self.__labels[ln] = None
+            self.__text.append((ln, None, None))
+            return
 
         match op:
             case 'LDA':  
@@ -76,7 +94,7 @@ class ASM:
                 arg1 = None
             case 'LXI':  
                 inst = 0x01 | self.reg_code2(arg1) << 0x4
-                arg1, arg2 = self.val_to_addr(arg1)
+                arg1, arg2 = self.val_to_addr(arg2)
             case 'INX':
                 inst = 0x03 | self.reg_code2(arg1) << 0x4
                 arg1 = None
@@ -243,20 +261,66 @@ class ASM:
 
         self.__text.append((inst, arg1, arg2))
 
+    def add_bss(self, ln:str):
+        k, v = ln.split(maxsplit=1)
+
+        if k in self.__bss:
+            print(f'WRN: Overwritten DATA key \'{k}\'')
+        if v.startswith('"'):
+            if not v.endswith('\"'): 
+                print(f'WRN: DATA string field {k} not closed')
+
+            v = v.strip('\"')
+            carr = []
+            for c in v: carr.append(f'0o{ord(c):03o}')
+            if len(carr) > 0 and carr[len(carr)-1] != '0': carr.append('0')
+            v = carr
+
+        self.__bss[k] = v
+
     def add_data(self, ln:str):
-        k, v = ln.split()
+        k, v = ln.split(maxsplit=1)
+
+        if k in self.__data:
+            print(f'WRN: Overwritten DATA key \'{k}\'')
+        if v.startswith('\"'):
+            print('WRN: DATA section cannot contain strings. Moving to BSS.')
+            self.add_bss(ln)
+            return
+        
         self.__data[k] = v
 
     def get_sym_loc(self, val, offset):
-        if not isinstance(val, str):
-            return f'0o{val:03o}' if val != None else None
-        val = val.removeprefix('$')
+        val = self.try_str_int(val)
+        if not isinstance(val, str): return f'0o{val:03o}' if val != None else None
+        
+        if not val.startswith(':'): val = val[1:]
+        
         t = 0xFF
-        if  self.__data.get(val): t = list(self.__data.keys()).index(val)
+        if  self.__data.get(val) != None: 
+            t = list(self.__data.keys()).index(val)
+        elif self.__bss.get(val) != None: 
+            t = list(self.__bss.keys()).index(val)
+        elif self.__labels.get(val) != None: 
+            offset = 0
+            t = self.__labels.get(val)
         else:
             print(f'Unrecognized symbol \'{val}\'')
 
         return f'0o{(t+offset):03o}'
+
+    def get_dict_size(self, data:dict):
+        sz = 0
+        for k,v in data.items():
+            if isinstance(v, list): sz += len(v)+1
+            elif isinstance(v, tuple):
+                sz += (
+                        1 if v[1] == None else
+                        2 if v[2] == None else 3
+                )
+            else: sz += 1
+
+        return sz
 
     def translate(self):
         ret = []
@@ -264,29 +328,53 @@ class ASM:
         
         cfg = GetConfig()
         #stack_sz = cfg.stack_size()
-        data_sz = len(self.__data)
+        data_sz = self.get_dict_size(self.__data)
+        bss_sz = self.get_dict_size(self.__bss)
+
         inst_sz = 0
 
         #find inst size
         for i in self.__text:
+            #detect labels
+            if isinstance(i[0], str) and i[0].startswith(':'):
+                self.__labels[i[0]] = inst_sz
+                idx = self.__text.index(i)
+                self.__text[idx] = None
+                continue
             inst_sz += (
                 1 if i[1] == None else
                 2 if i[2] == None else 3)
 
-        res_size = inst_sz+data_sz+1
+        res_size = inst_sz+data_sz+bss_sz+1
         ret = ['000'] * (res_size)
         ret[0] = 'base=8'
 
-        #set data region
+        #set bss region
         offs = inst_sz
+        i = 1
+        for k,v in self.__bss.items():
+            #Load strings
+            if isinstance(v, list):
+                for c in v:
+                    ret[offs+i] = f'0o{int(c, 0):03o}'
+                    i += 1
+            else: 
+                ret[offs+i] = f'0o{int(v, 0):03o}'
+                i += 1
+
+        #set data region
+        offs = inst_sz+bss_sz
         i = 1
         for k,v in self.__data.items():
             #TODO pre write calcs
-            ret[offs + i] = f'0o{int(v,8):03o}'
+            ret[offs + i] = f'0o{int(v,0):03o}'
             i += 1
 
         i = 1
         for inst in self.__text:
+
+            if inst == None: continue
+
             ret[i] = f'0o{inst[0]:03o}'
             a1 = self.get_sym_loc(inst[1], inst_sz)
             a2 = self.get_sym_loc(inst[2], inst_sz)
@@ -330,6 +418,7 @@ class ASM:
                 match ln:
                     case '.TEXT': seg = Seg.TEXT
                     case '.DATA': seg = Seg.DATA
+                    case '.BSS': seg = Seg.BSS
                     case '_START': pass
                     case _: print(f'WRN: Unknown section or region \'{ln}\'')
                 continue
@@ -337,6 +426,7 @@ class ASM:
             match seg:
                 case Seg.TEXT:  self.add_text(ln)
                 case Seg.DATA:  self.add_data(ln)
+                case Seg.BSS:   self.add_bss(ln)
         
         if err: return
 

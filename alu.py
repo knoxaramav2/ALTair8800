@@ -57,7 +57,7 @@ class ALU(SharedALU):
             case _: print(f'ERROR: Register {reg.name} not a valid working register')
     
     def read_flag(self, flag: ALU_Flag):
-        return self.__flags[flag.value]
+        return self.__flags[flag.value-1]
     
     def set_flag(self, flag: ALU_Flag, val:int):
         self.__flags[flag.value-1] = val
@@ -118,7 +118,7 @@ class ALU(SharedALU):
             src_val = self.read_reg(ALU_Reg(src_c))
         elif op.addrm == ADDRM.REG:
             src_val = self.read_direct()
-            dst_c = (op.inst>>3)&0x7
+            dst_c = ((op.inst>>3)&0x7) + 1
         
         self.set_reg(ALU_Reg(dst_c), src_val)
 
@@ -285,6 +285,9 @@ class ALU(SharedALU):
     def __LXI(self, op:OP):
         reg = self.reg_pair(op.inst>>4&0x3)
         val = self.read_direct(two_reads=True)
+        if reg == ALU_Reg.MA:
+            self.__scpu.stck_ptr = val
+            return
         self.set_reg(reg, val)
 
     def __ROT(self, op:OP):
@@ -317,6 +320,9 @@ class ALU(SharedALU):
         self.__scpu.push_stack(self.__scpu.get_instr())
         self.__scpu.set_addr(addr)
 
+    def __INT(self, op:OP):
+        self.__scpu.inte.set(op.alt)
+
     #COMPARE
     def __CMP(self, op:OP):
 
@@ -324,9 +330,10 @@ class ALU(SharedALU):
         acc = self.read_reg(ALU_Reg.A)
 
         if op.addrm == ADDRM.IMM: val = self.read_direct()
-        elif op.addrm == ADDRM.REG: val = self.read_reg(ALU_Reg(op.inst&0x7))
+        elif op.addrm == ADDRM.REG: val = self.read_reg(ALU_Reg((op.inst&0x7)+1))
 
         diff = acc - val
+        print(f'CMP: {acc:02x}/{val:02x}')
 
         self.set_flag(ALU_Flag.Z, diff==0)
         self.set_flag(ALU_Flag.C, val > acc) #TODO Check sense if sign mismatch
@@ -377,7 +384,6 @@ class ALU(SharedALU):
         self.__scpu.jmp_addr(addr)
 
     #RETURN
-
     def __RET(self, op:OP):
         
         ret = False
@@ -407,7 +413,9 @@ class ALU(SharedALU):
 
         match op.opcode:
             case OPCODE.IN: self.__IN(op)#TBD
-            case OPCODE.OUT: self.__OUT(inst)#TDB
+            case OPCODE.OUT: self.__OUT(op)#TDB
+
+            case OPCODE.INT: self.__INT(op)#Check
 
             case OPCODE.LDA: self.__LDA(op)#Check
             case OPCODE.STA: self.__STA(op)#Check
@@ -445,7 +453,7 @@ class ALU(SharedALU):
             case OPCODE.NOP: pass
 
             case _:
-                print(f'WARNING: Unrecognized instruction "{itype}"')
+                print(f'WARNING: Unrecognized instruction "{op.opcode}"')
 
         self.__cmp.update_display()
         

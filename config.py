@@ -10,10 +10,12 @@ class Config:
     __stack_size__  = MAX8
 
     __dbg_mode__    = False
+    __dev0__        = False
 
     __prg_file__    = ''
     __alu_file__    = 'alu.cfg'
 
+    def dev0(self): return self.__dev0__
     def mem_size(self): return self.__mem_size__
     def stack_size(self): return self.__stack_size__
     def debug_mode(self): return self.__dbg_mode__
@@ -33,6 +35,8 @@ class Config:
 
         match k:
             case '-d': self.__dbg_mode__ = True
+
+            case '--dev0': self.__dev0__ = True
 
             case '--memsize': self.__mem_size__=int(v)
             case '--stacksize': self.__stack_size__=int(v)
