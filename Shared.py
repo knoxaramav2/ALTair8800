@@ -70,6 +70,9 @@ class SharedCPU:
     wait            : BooleanVar
     memr            : BooleanVar
     intt            : BooleanVar
+    stack           : BooleanVar
+    inp             : BooleanVar
+    out             : BooleanVar
 
     mar             : int = 0
     mbr             : int = 0
@@ -106,6 +109,10 @@ class SharedCPU:
         self.m1 = BooleanVar(tk, True)
         self.memr = BooleanVar(tk, True)
         self.intt = BooleanVar(tk, False)
+        self.inp = BooleanVar(tk, False)
+        self.int = BooleanVar(tk, False)
+        self.out = BooleanVar(tk, False)
+        self.stack = BooleanVar(tk, False)
         
 class SharedClock:
 
@@ -136,14 +143,37 @@ class SharedCU:
         self.M1 = BooleanVar(tk, True)
         self.wait = self.sclock.wait
 
+class SharedDevConn:
+
+    def set(self, byte:int): pass
+    def get(self) -> int: pass
+
+    def __init__(self) -> None:
+        pass
+
+class SharedIOBuffLatch:
+
+    def write(self, addr:int, byte:int): pass
+    def read(self, addr:int) -> int: pass
+    def connect(self, dev:SharedDevConn): pass
+
+    def __init__(self, dev_count) -> None:
+        pass
+        
+
 class SharedMachine:
     power_on        : BooleanVar
     run             : bool = False
     addr_sw         : [BooleanVar] = []
     addr_buffer     : [BooleanVar] = []
     data_buffer     : [BooleanVar] = []
+    io_latch        : SharedIOBuffLatch
 
     #Interface
+    def connect_device(self, dev:SharedDevConn):pass
+    def disconnect_device(self, dev_no:int):pass
+    def interrupt(self): pass
+
     def get_sw_addr(self):pass
     def set_cpu_addr(self):pass
     def update_addr_buffer(self):pass

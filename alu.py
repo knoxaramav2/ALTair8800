@@ -100,6 +100,7 @@ class ALU(SharedALU):
     #IO
     def __OUT(self, op:OP):
         addr = self.read_direct()
+        acc = self.read_reg(ALU_Reg.A)
         #TODO Send to dev. no
     
     def __IN(self, op:OP):

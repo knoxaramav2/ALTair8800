@@ -187,11 +187,11 @@ class UI:
                 case 'INTE': v = self.s_cpu.inte
                 case 'PROT': v = self.s_mem.protect
                 case 'MEMR': v = self.s_cpu.memr
-                case 'INP': v = None
+                case 'INP': v = self.s_cpu.inp
                 case 'M1': v = self.s_cu.M1
-                case 'OUT': v = None
+                case 'OUT': v = self.s_cpu.out
                 case 'HLTA': v = self.s_cpu.hlta
-                case 'STACK': v = None
+                case 'STACK': v = self.s_cpu.stack
                 case 'WO': v = self.s_cpu.wo
                 case 'INT': v = self.s_cpu.intt
                 case _: pass

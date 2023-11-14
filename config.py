@@ -6,6 +6,7 @@ class Config:
 
     __clock_rate__  = 2000000
 
+    __dev_limit__   = 10
     __mem_size__    = MAX16
     __stack_size__  = MAX8
 
@@ -37,6 +38,7 @@ class Config:
             case '-d': self.__dbg_mode__ = True
 
             case '--dev0': self.__dev0__ = True
+            case '--devlim': self.__dev_limit__ = int(v)
 
             case '--memsize': self.__mem_size__=int(v)
             case '--stacksize': self.__stack_size__=int(v)
@@ -44,7 +46,7 @@ class Config:
             case '--program': self.__prg_file__ = v
             case '--aludecode': self.__dec_file__ = v
 
-            case '--clockrate': self.__clock_rate__ = v
+            case '--clockrate': self.__clock_rate__ = int(v)
 
             case _: pass
 

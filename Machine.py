@@ -2,10 +2,13 @@
 
 from tkinter import Tk
 from CPU import CPU
+from IOBufferLatch import IOBufferLatch
 from Memory import Memory
 from Shared import SharedMachine
+from config import Config, GetConfig
 from control_unit import ControlUnit
 from decoder import Decoder
+from devconn import DevConn
 from util import *
 from tk_manager import GetTK
 
@@ -16,9 +19,11 @@ class Machine(SharedMachine):
     __mem     : Memory
     __cu      : ControlUnit
     __dec     : Decoder
+    __io_latch: IOBufferLatch
 
     __tk    : Tk
     __util  : Util
+    __cfg   : Config
 
     def reset(self):
         self.reset_buffers(self.__tk)
@@ -60,10 +65,12 @@ class Machine(SharedMachine):
     def __init__(self):
         self.__tk = GetTK()
         self.__util = GetUtil()
+        self.__cfg = GetConfig()
         super().__init__(self.__tk)
 
         self.__mem = Memory()
         self.__dec = Decoder()
+        self.io_latch = IOBufferLatch(self.__cfg.__dev_limit__)
         self.__cpu = CPU(self, self.__dec)
         self.__cu = ControlUnit(self.__cpu, self.__mem, self.__dec)
         

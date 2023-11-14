@@ -40,7 +40,7 @@ class ASM:
         match r:
             case 'B': return 0x0
             case 'D': return 0x1
-            case 'E': return 0x2
+            case 'H': return 0x2
             case 'PWD': return 0x3
             case 'SP': return 0x3
 
@@ -335,6 +335,7 @@ class ASM:
 
         #find inst size
         for i in self.__text:
+            if i == None: continue
             #detect labels
             if isinstance(i[0], str) and i[0].startswith(':'):
                 self.__labels[i[0]] = inst_sz
@@ -367,6 +368,7 @@ class ASM:
         i = 1
         for k,v in self.__data.items():
             #TODO pre write calcs
+            v = self.get_sym_loc(v, offs)
             ret[offs + i] = f'0o{int(v,0):03o}'
             i += 1
 

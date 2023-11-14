@@ -12,6 +12,8 @@ comp = Machine()
 ui = UI(comp)
 d0 = DEV0(ui)
 
+comp.connect_device(d0)
+
 init_hotkeys(comp, ui)
 
 ui.run()
